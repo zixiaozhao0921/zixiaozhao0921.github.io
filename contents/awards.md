@@ -1,13 +1,7 @@
-- National Scholarship of Graduate Student, 2024.
+- 全国大学生数学建模竞赛上海赛区 二等奖 2023年
 
-- First-prize Scholarship of CUMT, 2024.
+- 上海交通大学本科生奖学金 C等 2022-2023学年
 
-- First-prize Scholarship of CUMT, 2023.
+- 上海交通大学优秀团员 2023-2024学年
 
-- Freshman Scholarship of CUMT, 2022.
-
-- Excellent Graduation Project of Jiangsu Province, 2022.
-
-- First-prize Enterprise Scholarship of CUMT, 2020.
-
-- First-prize Scholarship of CUMT, 2019.
+- 全国青少年信息学奥林匹克联赛北京赛区 一等奖 2022年
