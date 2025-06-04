@@ -17,6 +17,8 @@ High Performance Computing
 
 #### Study Resources
 
+- CUDA
+
 【Nvidia官方课程】CUDA入门课【中英字幕】
 https://www.bilibili.com/video/BV1JJ4m1P7xW/?spm_id_from=333.337.search-card.all.click&vd_source=b2fcf1c28abf8bb0d1f1c65bb8775bd0
 
