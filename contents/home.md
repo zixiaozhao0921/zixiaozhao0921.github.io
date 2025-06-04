@@ -19,13 +19,25 @@ High Performance Computing
 
 - CUDA
 
-	[[【Nvidia官方课程】CUDA入门课【中英字幕】]](https://www.bilibili.com/video/BV1JJ4m1P7xW/?spm_id_from=333.337.search-card.all.click&vd_source=b2fcf1c28abf8bb0d1f1c65bb8775bd0)
+	- [[【Nvidia官方课程】CUDA入门课【中英字幕】]](https://www.bilibili.com/video/BV1JJ4m1P7xW/?spm_id_from=333.337.search-card.all.click&vd_source=b2fcf1c28abf8bb0d1f1c65bb8775bd0)
+	- [[CUDA 入门指南：从零开始掌握 GPU 并行计算]](https://blog.csdn.net/weixin_47231119/article/details/146244732)
+	- [[CUDA Training Series by NVIDIA]](https://www.olcf.ornl.gov/cuda-training-series/)
 
-	[[CUDA 入门指南：从零开始掌握 GPU 并行计算]](https://blog.csdn.net/weixin_47231119/article/details/146244732)
+- FFT & Poisson方程
 
-	[[CUDA Training Series by NVIDIA]](https://www.olcf.ornl.gov/cuda-training-series/)
+	- [[从小白到用FFT(快速傅里叶变换)解泊松方程]](https://zhuanlan.zhihu.com/p/391398462)
+	- 《数值分析》(张平文 李铁军)第五章——快速Fourier变换：Fourier变换、离散Fourier变换、快速Fourier算法介绍，Dirichlet条件的一维Poisson方程DST算法
+	- 《偏微分方程数值解》(黄建国)第二章第4节——求解五点差分格式的快速DST方法
 
-- FFT
+- Parallel Computing
 
-从小白到用FFT(快速傅里叶变换)解泊松方程
-https://zhuanlan.zhihu.com/p/391398462
+	- [[Applications of Parallel Computers 2022, UCB CS267]](https://sites.google.com/lbl.gov/cs267-spr2022)
+	- [[FFT solver for Poisson equation]](https://youjunhu.github.io/research_notes/particle_simulation/particle_simulationsu24.html)
+	- [[]]()
+
+	
+
+
+
+
+
