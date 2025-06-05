@@ -22,6 +22,7 @@ High Performance Computing
 	- [[【Nvidia官方课程】CUDA入门课【中英字幕】]](https://www.bilibili.com/video/BV1JJ4m1P7xW/?spm_id_from=333.337.search-card.all.click&vd_source=b2fcf1c28abf8bb0d1f1c65bb8775bd0)
 	- [[CUDA 入门指南：从零开始掌握 GPU 并行计算]](https://blog.csdn.net/weixin_47231119/article/details/146244732)
 	- [[CUDA Training Series by NVIDIA]](https://www.olcf.ornl.gov/cuda-training-series/)
+	- [[CUDA编译流程 官方文档]](https://docs.nvidia.com/cuda/cuda-compiler-driver-nvcc/index.html)
 
 
 - FFT & Poisson方程

@@ -1,13 +1,55 @@
 此处放我的笔记
 
-#### CUDA
+## CUDA
+
+- driver API & runtime API
+- NVIDIA-smi工具
+- 编译命令：nvcc hello.cn -o hello
+- \_\_global\_\_修饰词
+- 核函数只能访问GPU内存、不能使用变长参数、不能使用静态变量、不能使用函数指针、核函数具有异步性、不支持C++的iostream(不能cout)
+- `cudaDeviceSynchronize()` 主机与设备同步
+- `someCUDAfunction<<<grid_size, block_size>>>()` grid-block-thread
+- Kernel核函数的内建变量: `gridDim.x, blockDim.x, blockIdx.x, threadIdx.x`
+- CUDA可以组织三维的grid和block
+- 二维grid+二维block为例，ID计算方式为:
+
+```
+int blockId = blockIdx.x + blockIdx.y * gridDim.x;
+int threadId = threadIdx.x + threadIdx.y * blockDim.x;
+int id = threadId + blockId * (blockDim.x * blockDim.y);
+```
+- `__device__, __global__, __host__`
+- Debug: `cudaError_t类型, cudaGetErrorName函数(返回字符串), cudaGetErrorString函数(返回字符串)`
+- Debug检查函数
+
+```
+cudaError_t ErrorCheck(cudaError_t error_code, const char* filename, int lineNumber)
+{
+    if (error_code != cudaSuccess)
+    {
+        printf("CUDA error:\r\ncode=%d, name=%s, description=%s\r\nfile=%s, line=%d\r\n",
+               error_code, 
+               cudaGetErrorName(error_code), 
+               cudaGetErrorString(error_code), 
+               filename, 
+               lineNumber);
+        return error_code;
+    }
+    return error_code;
+}
+```
+- Kernel函数只能为void类型，检测方法为
+
+```
+ErrorCheck(cudaGetLastError(), __FILE__, __LINE__);
+ErrorCheck(cudaDeviceSynchronize(), __FILE__, __LINE__);
+```
 
 
+## Parallel Computing
 
-#### Parallel Computing
 
-
-#### Fourier变换, 离散Fourier变换(DFT), 快速Fourier变换(FFT)
+## Fourier变换, 离散Fourier变换(DFT), 快速Fourier变换(FFT)
 
 **Fourier变换**
 
