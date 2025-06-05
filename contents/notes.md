@@ -47,12 +47,14 @@ $$ \vec{c} = F\vec{a} $$
 
 其中 $ F $ 为Fourier矩阵：
 
-$$ F = \begin{pmatrix}
+$$
+F = \begin{pmatrix}
 1 & 1 & \cdots & 1 \\
 1 & w & \cdots & w^{N-1} \\
 \vdots & \vdots & \ddots & \vdots \\
 1 & w^{N-1} & \cdots & w^{(N-1)^2}
-\end{pmatrix} $$
+\end{pmatrix}
+$$
 
 可逆性由Vandermonde行列式保证。
 
