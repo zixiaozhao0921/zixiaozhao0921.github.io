@@ -46,8 +46,6 @@ ErrorCheck(cudaDeviceSynchronize(), __FILE__, __LINE__);
 ```
 
 
-## Parallel Computing
-
 
 ## Fourier变换, 离散Fourier变换(DFT), 快速Fourier变换(FFT)
 
