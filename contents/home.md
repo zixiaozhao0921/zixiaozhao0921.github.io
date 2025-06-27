@@ -32,8 +32,8 @@ High Performance Computing
 	- **FFT基础、一维Poisson方程**《数值分析》(张平文 李铁军)第五章——快速Fourier变换：Fourier变换、离散Fourier变换、快速Fourier算法介绍，Dirichlet条件的一维Poisson方程DST算法
 	- **二维Poisson方程**《偏微分方程数值解》(黄建国)第二章第4节——求解五点差分格式的快速DST方法
 	- **Fourier矩阵角度理解FFT**《Introduction to Linear Algebra》(Fifth Edition)Chapter 9.3, The Fast Fourier Transform
-	- **Kronecker Product角度理解二维Poisson方程对应系数矩阵**《Mathematical Methods For Engineers II》Chaper 3.5, Finite Differences and Fast Poisson Solvers
-
+	- **Kronecker Product角度理解二维Poisson方程对应系数矩阵**《Mathematical Methods For Engineers II》 (Gilbert Strang) Chaper 3.5, Finite Differences and Fast Poisson Solvers
+	- **DCT的解读**《The Discrete Cosine Transform》 (Gilbert Strang)
 
 - Parallel Computing
 

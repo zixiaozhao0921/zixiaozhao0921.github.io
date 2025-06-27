@@ -2,15 +2,23 @@
 
 ## CUDA
 
-- driver API & runtime API
-- NVIDIA-smi工具
-- 编译命令：nvcc hello.cn -o hello
-- \_\_global\_\_修饰词
-- 核函数只能访问GPU内存、不能使用变长参数、不能使用静态变量、不能使用函数指针、核函数具有异步性、不支持C++的iostream(不能cout)
+- GPU性能指标：核心数、显存容量、计算峰值、显存带宽
+- CUDA提供两层API接口，CUDA driver API和CUDA runtime API
+- GPU状态查询和配置工具：`NVIDIA-smi`工具
+- 编译CUDA文件的命令：`nvcc hello.cn -o hello`(后`./hello.cn`)
+- 核函数必须是`void`类型，void前有`__global__`修饰词
+- 核函数的特殊性：
+	- 只能访问GPU内存
+	- 不能使用变长参数
+	- 不能使用静态变量
+	- 不能使用函数指针
+	- 核函数具有异步性
+	- 不支持C++的iostream(不能`cout`)
 - `cudaDeviceSynchronize()` 主机与设备同步
-- `someCUDAfunction<<<grid_size, block_size>>>()` grid-block-thread
+- 调用CUDA核函数：`someCUDAfunction<<<grid_size, block_size>>>()` 
+- GPU线程模型结构：grid(网格) - block(线程块) - thread(线程)
 - Kernel核函数的内建变量: `gridDim.x, blockDim.x, blockIdx.x, threadIdx.x`
-- CUDA可以组织三维的grid和block
+- CUDA线程模型可以组织一维至三维的grid和block
 - 二维grid+二维block为例，ID计算方式为:
 
 ```
@@ -18,6 +26,13 @@ int blockId = blockIdx.x + blockIdx.y * gridDim.x;
 int threadId = threadIdx.x + threadIdx.y * blockDim.x;
 int id = threadId + blockId * (blockDim.x * blockDim.y);
 ```
+- nvcc编译流程：
+	- nvcc先将设备代码编译为PTX (Parallel Thread Execution) 伪汇编代码，再将PTX代码编译为二进制的cubin目标代码。
+	- 在将源代码编译为PTX代码时，需要用选项`-arch=compute_XY`指定一个虚拟架构的计算能力，用以确定代码中能够使用的CUDA功能。
+	- 在将PTX代码编译为cubin代码时，需要用选项`-code=sm_ZW`指定一个真实架构的计算能力，用以确定可执行文件能够使用的GPU。
+	- XY分别指主版本号和次版本号。真实架构版本号要大于等于虚拟架构版本号。可单独指定虚拟架构版本号，不可单独指定真实架构版本号。
+	- nvcc可指定多个GPU版本编译，使得编译出来的可执行文件可以在多GPU中执行。编译命令为`-gencode=arch=compute_XY -code=sm_XY`。生成的可执行文件称为胖二进制文件(fatbinary)。
+	- 不同版本CUDA编译器在编译CUDA代码时，都有一个默认计算能力：CUDA 9.0~10.2默认计算能力3.0，CUDA 11.6默认计算能力5.2......
 - `__device__, __global__, __host__`
 - Debug: `cudaError_t类型, cudaGetErrorName函数(返回字符串), cudaGetErrorString函数(返回字符串)`
 - Debug检查函数
