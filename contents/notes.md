@@ -33,6 +33,15 @@ int id = threadId + blockId * (blockDim.x * blockDim.y);
 	- XY分别指主版本号和次版本号。真实架构版本号要大于等于虚拟架构版本号。可单独指定虚拟架构版本号，不可单独指定真实架构版本号。
 	- nvcc可指定多个GPU版本编译，使得编译出来的可执行文件可以在多GPU中执行。编译命令为`-gencode=arch=compute_XY -code=sm_XY`。生成的可执行文件称为胖二进制文件(fatbinary)。
 	- 不同版本CUDA编译器在编译CUDA代码时，都有一个默认计算能力：CUDA 9.0~10.2默认计算能力3.0，CUDA 11.6默认计算能力5.2......
+- 设置GPU设备 (获取GPU设备数量&设置GPU执行时使用的设备)
+ 
+```
+int iDeviceCount = 0;
+cudaGetDeviceCount(&iDeviceCount);
+
+int iDev = 0;
+cudaSetDevice(iDev);
+```
 - `__device__, __global__, __host__`
 - Debug: `cudaError_t类型, cudaGetErrorName函数(返回字符串), cudaGetErrorString函数(返回字符串)`
 - Debug检查函数
