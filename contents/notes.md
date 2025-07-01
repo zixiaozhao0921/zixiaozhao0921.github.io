@@ -42,9 +42,48 @@ cudaGetDeviceCount(&iDeviceCount);
 int iDev = 0;
 cudaSetDevice(iDev);
 ```
+- CUDA内存管理
+	- 内存分配 `cudaMalloc`
+
+	```
+	主机分配内存：extern void *malloc(unsigned int num_bytes);
+	float *fpHost_A;
+	fpHost_A = (float *)malloc(nBytes);
+	设备分配内存：
+	float *fpDevice_A;
+	cudaMalloc((float**)&fpDevice_A, nBytes);
+	```
+	- 数据传递 `cudaMemcpy`
+
+	```
+	主机数据拷贝：void *memcpy(void &dest, const void *src, size_t n);
+	memcpy((void *)d, (void *)s, nBytes);
+	设备数据拷贝：__host__ cudaError_t cudaMemcpy (void *dst, const void *src, size_t count, cudaMemcpyKind kind)
+	cudaMemcpy(Device_A, Host_A, nBytes, cudaMemcpyKind)
+	cuudaMemcpyKind有四种类型和一种默认类型
+		- cudaMemcpyHostToHost
+		- cudaMemcpyHostToDevice
+		- cudaMemcpyDeviceToHost
+		- cudaMemcpyDeviceToDevice
+		- cudaMemcpyDefault (默认类型只允许在支持统一虚拟寻址的系统上使用)
+	```
+	- 内存初始化 `cudaMemset`
+
+	```
+	主机内存初始化：void *memset(void *str, int c, size_t n);
+	memset(fpHost_A, 0, nBytes);
+	设备内存初始化
+	cudaMemset(fpDevice_A, 0, nBytes);
+	```
+	- 内存释放 `cudaFree`
+
+	```
+	主机free(pHost_A);
+	设备cudaFree(pDevice_A);
+	```
 - `__device__, __global__, __host__`
 - Debug: `cudaError_t类型, cudaGetErrorName函数(返回字符串), cudaGetErrorString函数(返回字符串)`
-- Debug检查函数
+Debug检查函数
 
 ```
 cudaError_t ErrorCheck(cudaError_t error_code, const char* filename, int lineNumber)
