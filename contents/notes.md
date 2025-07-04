@@ -81,7 +81,7 @@ cudaSetDevice(iDev);
 	主机free(pHost_A);
 	设备cudaFree(pDevice_A);
 	```
-- `__device__, __global__, __host__`
+- `__device__, __global__, __host__`global就是修饰核函数用的，核函数有可能会调用一些device函数 (在GPU上运行) ，host类型是在CPU上运行的函数类型，通常会默认。
 - Debug: `cudaError_t类型, cudaGetErrorName函数(返回字符串), cudaGetErrorString函数(返回字符串)`
 Debug检查函数
 
@@ -96,16 +96,42 @@ cudaError_t ErrorCheck(cudaError_t error_code, const char* filename, int lineNum
                cudaGetErrorString(error_code), 
                filename, 
                lineNumber);
-        return error_code;
     }
     return error_code;
 }
 ```
-- Kernel函数只能为void类型，检测方法为
+- Debug检测函数示例
+
+```
+ErrorCheck(cudaMemset(fpDevice_A, 0, stBytesCount), __FILE__, __LINE__);
+```
+- 如果用于检测核函数，方法为
 
 ```
 ErrorCheck(cudaGetLastError(), __FILE__, __LINE__);
 ErrorCheck(cudaDeviceSynchronize(), __FILE__, __LINE__);
+```
+- CUDA中的计时
+
+```
+cudaEvent_t start, stop;
+ErrorCheck(cudaEventCreate(&start), __FILE__, __LINE__);
+ErrorCheck(cudaEventCreate(&stop), __FILE__, __LINE__);
+ErrorCheck(cudaEventRecord(start), __FILE__, __LINE__);
+cudaEventQuery(start); //此处不可用错误检测函数
+
+/***
+运行代码
+***/
+
+ErrorCheck(cudaEventRecord(stop), __FILE__, __LINE__);
+ErrorCheck(cudaEventSychronize(stop), __FILE__, __LINE__);
+float elapsed_time;
+ErrorCheck(cudaEventElapsedTime(&elapsed_time, start, stop), __LINE__, __LINE__);
+printf("Time = %g ms.\n", elapsed_time);
+
+ErrorCheck(cudaEventDestroy(start), __FILE__, __LINE__);
+ErrorCheck(cudaEventDestroy(stop), __FILE__, __LINE__);
 ```
 
 
