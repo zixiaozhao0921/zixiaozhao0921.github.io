@@ -15,6 +15,15 @@ B.S., Mathematics and Applied Mathematics, Shanghai Jiao Tong University, 2022-2
 #### Research Interests
 High Performance Computing
 
+### TODO List
+
+- CUDA基础、CUDA Profiling
+	- Nsight Systems性能分析工具
+	- 《CUDA编程基础入门系列》4.2内存模型概述及之后
+- Poisson Solver Using FFT on GPU
+- mfem
+
+
 #### Study Resources
 
 - CUDA

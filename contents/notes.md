@@ -1,6 +1,6 @@
 此处放我的笔记
 
-## CUDA
+## CUDA基础
 
 - GPU性能指标：核心数、显存容量、计算峰值、显存带宽
 - CUDA提供两层API接口，CUDA driver API和CUDA runtime API
@@ -133,6 +133,97 @@ printf("Time = %g ms.\n", elapsed_time);
 ErrorCheck(cudaEventDestroy(start), __FILE__, __LINE__);
 ErrorCheck(cudaEventDestroy(stop), __FILE__, __LINE__);
 ```
+- CUDA运行时API查询GPU信息
+
+```
+cudaDeviceProp prop; // prop是一个结构体, 包含GPU的信息
+ErrorCheck(cudaGetDeviceProperties(&prop, device_id), __FILE__, __LINE__);
+	printf("Device id:                                 %d\n",
+        device_id);
+    printf("Device name:                               %s\n",
+        prop.name);
+    printf("Compute capability:                        %d.%d\n",
+        prop.major, prop.minor);
+    printf("Amount of global memory:                   %g GB\n",
+        prop.totalGlobalMem / (1024.0 * 1024 * 1024));
+    printf("Amount of constant memory:                 %g KB\n",
+        prop.totalConstMem  / 1024.0);
+    printf("Maximum grid size:                         %d %d %d\n",
+        prop.maxGridSize[0], 
+        prop.maxGridSize[1], prop.maxGridSize[2]);
+    printf("Maximum block size:                        %d %d %d\n",
+        prop.maxThreadsDim[0], prop.maxThreadsDim[1], 
+        prop.maxThreadsDim[2]);
+    printf("Number of SMs:                             %d\n",
+        prop.multiProcessorCount);
+    printf("Maximum amount of shared memory per block: %g KB\n",
+        prop.sharedMemPerBlock / 1024.0);
+    printf("Maximum amount of shared memory per SM:    %g KB\n",
+        prop.sharedMemPerMultiprocessor / 1024.0);
+    printf("Maximum number of registers per block:     %d K\n",
+        prop.regsPerBlock / 1024);
+    printf("Maximum number of registers per SM:        %d K\n",
+        prop.regsPerMultiprocessor / 1024);
+    printf("Maximum number of threads per block:       %d\n",
+        prop.maxThreadsPerBlock);
+    printf("Maximum number of threads per SM:          %d\n",
+        prop.maxThreadsPerMultiProcessor);
+```
+
+## GPU硬件资源、CUDA内存模型
+
+- 流多处理器 (SM)
+
+一个GPU是由多个SM构成的，Fermi架构的SM关键资源如下：
+
+1. CUDA核心 (CUDA core)
+2. 共享内存/L1缓存 (shared memory/L1 cache)
+3. 寄存器文件 (Register File)
+4. 加载和储存单元 (Load/Store Units)
+5. 特殊函数单元 (Special Function Unit)
+6. Warps调度 (Warps Scheduler)
+
+![并发与并行](https://i.imgs.ovh/2025/07/04/q9B8C.png)
+
+- 线程模型与物理结构
+
+| 类别     | 层级1      | 层级2    | 层级3    |
+|----------|------------|----------|----------|
+| Software | Thread     | Block    | Grid     |
+| Hardware | CUDA Core  | SM       | Device   |
+
+- 线程束 (warp)
+
+在硬件中，网格中的所有线程块需要分配到SM上进行执行。每个线程块内的所有线程会分配到同一个SM中执行，但是每个SM上可以被分配多个线程块。线程块分配到SM中后，会以32个线程为一组进行分割，每个组成为一个线程束 (wrap)。
+同一个线程块中的相邻32个线程是一个线程束，因此线程块中包含的线程数量通常是32的倍数，这样有助于物理上的locality，也就有利于运行效率。
+
+![线程束](https://i.imgs.ovh/2025/07/04/qJAAq.png)
+
+- CUDA内存模型
+	- 寄存器 (register)
+	- 共享内存 (shared memory)
+	- 局部内存 (local memory)
+	- 常量内存 (constant memory)
+	- 纹理内存 (tesxture memory)
+	- 全局内存 (global memory)
+
+| 内存类型         | 物理位置   | 访问权限   | 可见范围             | 生命周期             |
+|------------------|------------|------------|----------------------|----------------------|
+| 全局内存         | 在芯片外   | 可读可写   | 所有线程和主机端     | 由主机分配与释放     |
+| 常量内存         | 在芯片外   | 仅可读     | 所有线程和主机端     | 由主机分配与释放     |
+| 纹理和表面内存   | 在芯片外   | 一般仅可读 | 所有线程和主机端     | 由主机分配与释放     |
+| 寄存器内存       | 在芯片内   | 可读可写   | 单个线程             | 所在线程             |
+| 局部内存         | 在芯片外   | 可读可写   | 单个线程             | 所在线程             |
+| 共享内存         | 在芯片内   | 可读可写   | 单个线程块           | 所在线程块           |
+
+![GPU-CUDA内存模型](https://i.imgs.ovh/2025/07/04/qDZcm.png)
+
+## CUDA Profiling性能分析
+
+CUDA的最新性能分析工具——Nsight Systems (2025.3.1)
+[NVIDIA-Nsight Systems](https://developer.nvidia.com/nsight-systems/get-started)
+
+
 
 
 ## MFEM软件笔记
