@@ -183,7 +183,8 @@ ErrorCheck(cudaGetDeviceProperties(&prop, device_id), __FILE__, __LINE__);
 5. 特殊函数单元 (Special Function Unit)
 6. Warps调度 (Warps Scheduler)
 
-![并发与并行](https://i.imgs.ovh/2025/07/04/q9B8C.png)
+<img src="https://i.imgs.ovh/2025/07/04/q9B8C.png"  width="200" />
+
 
 - 线程模型与物理结构
 
