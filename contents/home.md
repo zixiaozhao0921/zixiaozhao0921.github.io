@@ -21,10 +21,11 @@ High Performance Computing
 	- Nsight Systems性能分析工具 [[b站教程]](https://www.bilibili.com/video/BV1UP411s7nE/?spm_id_from=333.337.search-card.all.click&vd_source=b2fcf1c28abf8bb0d1f1c65bb8775bd0)
 	- Roofline model [[b站教程]](https://www.bilibili.com/video/BV1f34y1G741?spm_id_from=333.788.videopod.sections&vd_source=b2fcf1c28abf8bb0d1f1c65bb8775bd0)
 	- 《CUDA编程基础入门系列》4.5共享内存及之后
-	- cmake学习 ![[官方文档]](https://cmake.org/documentation/)
+	- cmake学习 [[官方文档]](https://cmake.org/documentation/)
 	- Qt生态？
 - Poisson Solver Using FFT on GPU
 	- 《The Discrete Cosine Transform, Gilbert Strang》
+	- CUDA Tutorial [[Github教程]](https://github.com/PaddleJitLab/CUDATutorial)
 - mfem
 - Parallel Computing
 

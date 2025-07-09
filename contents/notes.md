@@ -183,7 +183,7 @@ ErrorCheck(cudaGetDeviceProperties(&prop, device_id), __FILE__, __LINE__);
 5. 特殊函数单元 (Special Function Unit)
 6. Warps调度 (Warps Scheduler)
 
-<img src="https://i.imgs.ovh/2025/07/04/q9B8C.png"  width="200" />
+<img src="https://i.imgs.ovh/2025/07/04/q9B8C.png"  width="600" />
 
 
 - 线程模型与物理结构
@@ -198,7 +198,7 @@ ErrorCheck(cudaGetDeviceProperties(&prop, device_id), __FILE__, __LINE__);
 在硬件中，网格中的所有线程块需要分配到SM上进行执行。每个线程块内的所有线程会分配到同一个SM中执行，但是每个SM上可以被分配多个线程块。线程块分配到SM中后，会以32个线程为一组进行分割，每个组成为一个线程束 (wrap)。
 同一个线程块中的相邻32个线程是一个线程束，因此线程块中包含的线程数量通常是32的倍数，这样有助于物理上的locality，也就有利于运行效率。
 
-![线程束](https://i.imgs.ovh/2025/07/04/qJAAq.png)
+<img src="https://i.imgs.ovh/2025/07/04/qJAAq.png"  width="700" />
 
 - CUDA内存模型
 	- 寄存器 (register)
@@ -217,7 +217,7 @@ ErrorCheck(cudaGetDeviceProperties(&prop, device_id), __FILE__, __LINE__);
 | 局部内存         | 在芯片外   | 可读可写   | 单个线程             | 所在线程             |
 | 共享内存         | 在芯片内   | 可读可写   | 单个线程块           | 所在线程块           |
 
-![GPU-CUDA内存模型](https://i.imgs.ovh/2025/07/04/qDZcm.png)
+<img src="https://i.imgs.ovh/2025/07/04/qDZcm.png"  width="700" />
 
 - 寄存器内存
 	-  寄存器内存仅线程内可见，生命周期与线程一致。
@@ -225,13 +225,13 @@ ErrorCheck(cudaGetDeviceProperties(&prop, device_id), __FILE__, __LINE__);
 	-  在核函数中定义，但储存在本地内存的情况：长度在编译时不确定的数组、可能占用大量寄存器空间的较大本地结构体和数组、任何不满足核函数寄存器限定条件的变量？
 	-  不同计算能力的GPU每个SM/每个线程块/每个线程所容纳的最大寄存器数量是不同的：
 
-![寄存器](https://i.imgs.ovh/2025/07/06/5UPqF.png)
+<img src="https://i.imgs.ovh/2025/07/06/5UPqF.png"  width="700" />
 
 - 本地内存
 	- 每个线程最多可使用512K的本地内存
 	- 对于计算能力2.0以上的设备，本地内存的数据储存在每个SM的一级缓存和设备的二级缓存中
 
-![本地内存](https://i.imgs.ovh/2025/07/06/5U49d.png)
+<img src="https://i.imgs.ovh/2025/07/06/5U49d.png"  width="700" />
 
 - 共享内存
 	- 共享内存在线程块内可见，生命周期与线程块一致，可用于线程间通信
@@ -248,7 +248,7 @@ ErrorCheck(cudaGetDeviceProperties(&prop, device_id), __FILE__, __LINE__);
 	```
 	- 不同计算能力的GPU每个SM/每个线程块所容纳的最大共享内存大小是不同的
 
-![共享内存](https://i.imgs.ovh/2025/07/06/5UJB6.png)
+<img src="https://i.imgs.ovh/2025/07/06/5UJB6.png"  width="700" />
 
 - 全局内存
 	- 使用```__device__```关键字静态声明全局内存
