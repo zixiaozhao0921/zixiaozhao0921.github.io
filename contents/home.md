@@ -23,10 +23,12 @@ High Performance Computing
 	- 《CUDA编程基础入门系列》4.5共享内存及之后
 	- cmake学习 [[官方文档]](https://cmake.org/documentation/)
 	- Qt生态？
+	- CUDA Tutorial [[Github教程]](https://github.com/PaddleJitLab/CUDATutorial)
 - Poisson Solver Using FFT on GPU
 	- 《The Discrete Cosine Transform, Gilbert Strang》
-	- CUDA Tutorial [[Github教程]](https://github.com/PaddleJitLab/CUDATutorial)
 - mfem
+	- [[Tutorial]](https://mfem.org/tutorial/)
+	- ...腾讯元宝AI上有历史流程记录
 - Parallel Computing
 
 

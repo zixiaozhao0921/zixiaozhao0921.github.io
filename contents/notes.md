@@ -5,7 +5,7 @@
 - GPU性能指标：核心数、显存容量、计算峰值、显存带宽
 - CUDA提供两层API接口，CUDA driver API和CUDA runtime API
 - GPU状态查询和配置工具：`NVIDIA-smi`工具
-- 编译CUDA文件的命令：`nvcc hello.cn -o hello`(后`./hello.cn`)
+- 编译CUDA文件的命令：`nvcc hello.cu -o hello`(后`./hello.cu`)
 - 核函数必须是`void`类型，void前有`__global__`修饰词
 - 核函数的特殊性：
 	- 只能访问GPU内存
@@ -16,7 +16,7 @@
 	- 不支持C++的iostream(不能`cout`)
 - `cudaDeviceSynchronize()` 主机与设备同步
 - 调用CUDA核函数：`someCUDAfunction<<<grid_size, block_size>>>()` 
-- GPU线程模型结构：grid(网格) - block(线程块) - thread(线程)
+- GPU线程模型结构：grid(网格) - block(线程块) - thread(线程)[注：每32个线程是一个线程束warp]
 - Kernel核函数的内建变量: `gridDim.x, blockDim.x, blockIdx.x, threadIdx.x`
 - CUDA线程模型可以组织一维至三维的grid和block
 - 二维grid+二维block为例，ID计算方式为:
