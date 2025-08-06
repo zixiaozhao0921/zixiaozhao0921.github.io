@@ -170,6 +170,19 @@ ErrorCheck(cudaGetDeviceProperties(&prop, device_id), __FILE__, __LINE__);
         prop.maxThreadsPerMultiProcessor);
 ```
 
+- CUDA Stream与Event
+
+- 原子操作
+
+```
+atomicAdd();
+atomicSub();
+atomicExch();
+atomicMin();
+atomicMax();
+atomicCAS();
+```
+
 ## GPU硬件资源、CUDA内存模型
 
 - 流多处理器 (SM)
