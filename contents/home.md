@@ -18,19 +18,21 @@ High Performance Computing
 ### TODO List
 
 - CUDA基础、CUDA Profiling
-	- Nsight Systems性能分析工具 [[b站教程]](https://www.bilibili.com/video/BV1UP411s7nE/?spm_id_from=333.337.search-card.all.click&vd_source=b2fcf1c28abf8bb0d1f1c65bb8775bd0)
+	- Nsight Systems [[b站教程]](https://www.bilibili.com/video/BV1UP411s7nE/?spm_id_from=333.337.search-card.all.click&vd_source=b2fcf1c28abf8bb0d1f1c65bb8775bd0)
 	- Roofline model [[b站教程]](https://www.bilibili.com/video/BV1f34y1G741?spm_id_from=333.788.videopod.sections&vd_source=b2fcf1c28abf8bb0d1f1c65bb8775bd0)
+	- .cu和.cpp的互相引用及Makefile[[b站教程]](https://www.bilibili.com/video/BV1tG411f7FA/?spm_id_from=333.1007.top_right_bar_window_custom_collection.content.click&vd_source=b2fcf1c28abf8bb0d1f1c65bb8775bd0)
+	- CUDA实战-流&事件[[b站教程]](https://www.bilibili.com/video/BV1Eh4y1A7Wi?spm_id_from=333.788.videopod.sections&vd_source=b2fcf1c28abf8bb0d1f1c65bb8775bd0)
 	- 《CUDA编程基础入门系列》4.5共享内存及之后
-	- cmake学习 [[官方文档]](https://cmake.org/documentation/) 通过CMAke搭建编译链?
-	- Qt生态？
-	- CUDA Tutorial [[Github教程]](https://github.com/PaddleJitLab/CUDATutorial)
-	- Makefile? Makelist?
+	- 了解构建工具[[历史介绍]](https://baijiahao.baidu.com/s?id=1835925238778529521&wfr=spider&for=pc) [[CMake官方文档]](https://cmake.org/documentation/) [[CMake入门指南博客]](https://blog.csdn.net/wallwayj/article/details/147456408)
+	- CUDA Tutorial 初级系列(矩阵乘优化) 中级系列(Reduce优化,GEMM优化,卷积优化)[[Github教程]](https://github.com/PaddleJitLab/CUDATutorial)
+	- CUDA基础例子-加速矩阵运算[[知乎学习日记]](https://zhuanlan.zhihu.com/p/640086961)
 - Poisson Solver Using FFT on GPU
 	- 《The Discrete Cosine Transform, Gilbert Strang》
 - mfem
 	- [[Tutorial]](https://mfem.org/tutorial/)
 	- ...腾讯元宝AI上有历史流程记录
 - Parallel Computing
+
 
 #### My Computer
 
@@ -45,6 +47,7 @@ High Performance Computing
 | **内存时钟频率**      | 8001 MHz                            | 显存性能指标            |
 | **L2 缓存大小**       | 33554432 bytes (32 MB)              | 缓存加速                
 
+
 | 参数                          | 值      | 说明                                   |
 |-------------------------------|---------|----------------------------------------|
 | **CUDA 驱动版本**            | 12.7    | 由 NVIDIA 显卡驱动提供                |
@@ -52,6 +55,7 @@ High Performance Computing
 | **WDDM 模式**               | 启用    | Windows 显示驱动模型（正常）          |
 | **统一内存寻址 (UVA)**       | 支持    | 允许 CPU 和 GPU 共享虚拟地址空间      |
 | **计算抢占 (Preemption)**    | 支持    | 可中断长时间运行的内核                |
+
 
 | 参数                                  | 值                | 用途                                |
 |---------------------------------------|-------------------|-------------------------------------|
@@ -63,6 +67,7 @@ High Performance Computing
 | **并发内核执行**                     | 支持（1 个复制引擎） | 可同时运行多个 CUDA 内核           |
 | **纹理对齐要求**                     | 支持              | 优化纹理内存访问                    
 
+
 | **参数**               | **当前值**               | **理论参考值**       | **说明**                     |
 |-------------------------|--------------------------|----------------------|------------------------------|
 | **GPU 型号**           | NVIDIA RTX 4070 Laptop   | -                    | 笔记本移动端显卡             |
@@ -72,6 +77,7 @@ High Performance Computing
 | **Device→Host 带宽**   | 12833.3 MB/s (~12.8 GB/s)| PCIe 4.0 x8: 15.75 GB/s | GPU→CPU 数据传输速度        |
 | **Device→Device 带宽** | 222594.2 MB/s (~222 GB/s)| RTX 4070: 288 GB/s   | GPU 显存内部拷贝速度         |
 | **显存类型**           | GDDR6                    | -                    | 带宽效率约 77% (222/288)     |
+
 
 
 #### Study Resources
