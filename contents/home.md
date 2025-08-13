@@ -106,11 +106,16 @@ High Performance Computing
 
 - Parallel Computing
 
-	- [[Applications of Parallel Computers 2022, UCB CS267]](https://sites.google.com/lbl.gov/cs267-spr2022)
+	- [[Applications of Parallel Computers 2022, UCB CS267-b站视频]](Applications of Parallel Computers 2022, UCB CS267)
+	- [[Applications of Parallel Computers 2022, UCB CS267-官网]](https://sites.google.com/lbl.gov/cs267-spr2022)
 	- [[FFT solver for Poisson equation]](https://youjunhu.github.io/research_notes/particle_simulation/particle_simulationsu24.html)
-	- [[]]()
-
-	
+	- [[高性能计算的学习路线 知乎]](https://www.zhihu.com/question/33576416/answer/1243835966)
+	- [[高性能计算学习笔记 Github]](https://github.com/Eddie-Wang1120/HPC-Learning-Notes)
+	- [[计算数学或者计算力学的研究生或博士生C++要学到什么程度（要搞高性能计算）知乎]](https://www.zhihu.com/question/557675741)	
+	- [[零基础OpenMp教程 知乎]](https://zhuanlan.zhihu.com/p/17667388663)
+	- [[Roofline Model CSDN-1]](https://download.csdn.net/blog/column/9003100/141645388)
+	- [[Roofline Model CSDN-2]](https://blog.csdn.net/m0_57102661/article/details/144042331)
+	- [[Roofline Model 知乎]](https://zhuanlan.zhihu.com/p/663545398)
 
 
 

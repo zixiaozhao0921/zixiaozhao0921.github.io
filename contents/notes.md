@@ -1,6 +1,21 @@
 此处放我的笔记
 
-## CUDA基础
+## UCB CS267 Application of Parallel Computers
+
+### 名词解释
+
+- Threads (线程) & Process (进程)- SRAM: Static Random-Access Memory（静态随机存取存储器）包括L1, L2, L3 cache等- DRAM: Dynamic Random-Access Memory（动态随机存取存储器）包括主内存、显存等- Cashe hit & Cashe miss
+	当CPU或计算单元请求的数据已经存在于缓存（Cache）中时，称为缓存命中（反之为miss）- Memory Benchmark	
+	内存基准测试，是指通过标准化测试程序或工具，评估计算机内存（DRAM、Cache、HBM等）的性能指标，包括：	- 带宽（Bandwidth）：单位时间内可读写的数据量（GB/s）	- 延迟（Latency）：从发起请求到获取数据的时间（纳秒级）。	- 吞吐量（Throughput）：系统在单位时间内能完成的内存操作次数。- ILP: Instruction Level Parallelism
+- Pipelining
+- SIMD: Single Instruction Multiple 
+- FMA: Fused Multiply Add
+- CI: Computational Intensity, CI = f/m: average number of flops per slow memory access
+- Machine Balance: tm/tf, slow memory access time/fast arithmetic operation time- BLAS: Basic Linear Algebra Subroutines- NUMA: Non-Uniform Memory Access
+- POSIX: Portable Operating System Interface可移植操作系统接口- SpGEMM: Sparse General Matrix-Matrix Multiplication，稀疏通用矩阵乘法
+
+
+## CUDA
 
 - GPU性能指标：核心数、显存容量、计算峰值、显存带宽
 - CUDA提供两层API接口，CUDA driver API和CUDA runtime API
@@ -183,7 +198,7 @@ atomicMax();
 atomicCAS();
 ```
 
-## GPU硬件资源、CUDA内存模型
+### GPU硬件资源、CUDA内存模型
 
 - 流多处理器 (SM)
 
@@ -283,7 +298,7 @@ atomicCAS();
 - 避免线程束分化
 
 
-## CUDA Profiling性能分析
+### CUDA Profiling性能分析
 
 CUDA的最新性能分析工具——Nsight Systems (2025.3.1)
 [NVIDIA-Nsight Systems](https://developer.nvidia.com/nsight-systems/get-started)
@@ -291,7 +306,7 @@ CUDA的最新性能分析工具——Nsight Systems (2025.3.1)
 
 
 
-## MFEM软件笔记
+## MFEM
 
 
 ## Fourier变换, 离散Fourier变换(DFT), 快速Fourier变换(FFT)
