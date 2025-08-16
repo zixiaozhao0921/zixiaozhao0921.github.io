@@ -84,6 +84,7 @@ High Performance Computing
 
 - CUDA
 
+	- [[谭升博客]](https://face2ai.com/program-blog/)
 	- [[CUDA入门课 NVIDIA官方视频]](https://www.bilibili.com/video/BV1JJ4m1P7xW/?spm_id_from=333.337.search-card.all.click&vd_source=b2fcf1c28abf8bb0d1f1c65bb8775bd0)
 	- [[CUDA入门指南：从零开始掌握 GPU 并行计算 Blog]](https://blog.csdn.net/weixin_47231119/article/details/146244732)
 	- [[CUDA Training Series NVIDIA官方文档]](https://www.olcf.ornl.gov/cuda-training-series/)

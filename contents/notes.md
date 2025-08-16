@@ -2,16 +2,52 @@
 
 ## UCB CS267 Application of Parallel Computers
 
-### 名词解释
+### Memory Hierarchies & Matrix Multiplication
+
+- Load/Store的速度远比Operation(+,-,*,/...)快
+- C++/Fortran等的编译器(Compiler)流程：检查程序合法-转为汇编代码-优化汇编代码，优化包括
+	- Unroll loops	- Merges two loops together(called fuses loops)	- Reorder loops(called interchange loops)	- Eliminate dead code	- Reorder instruction to improve register reuse and more	- Strength reduction(*2 → <<1)
+- Memory access的两种costs
+	- **Latency**: cost to load/store $1^{st}$ word (通常用α表示，单位是time)	- **Bandwidth**: average rate to load/store a large chunk (通常用β表示，单位是time/byte)
+- 局部性（好的局部性运行速度快）
+	- **spatial locality**: accessing things nearby previous accesses	- **temporal locality**: reusing an item that was previously accessed
+- **Cache line length**: # of bytes loaded together in one entry (memory to cache in only **one-time** load)
+- Associativity (例如direct-mapped): only 1 address (line) in a given range in cache, 每个内存地址只能映射到缓存中唯一的一个特定位置
+- Pipelining: 隐藏Latency, 需要找到可并行的操作
+- 向量运算的SIMD: Simple Instruction Multiple Data
+- Data Dependencies Limit Parallelism(也叫Data Race)	- RAW: Read-After-Write (X = A; B = X)	- WAR: Write-After-Read (A = X; X = B)	- WAW: Write-After-Write (X = A; X = B)	- No problem / dependence for RAR: Read-After-Read- FMA: Fused Multiply Add, 单次和+, *速度相同
+- 非连续内存速度慢：
+	- Strided load ```...=a[i*4]```
+	- Strided store ```a[i*4]=...```
+	- Indexed(gather) ```...=a[b[i]]```
+	- Indexed(scatter) ```a[b[i]]=...```
+- A Simple Model of Memory	- Assume just 2 levels in the hierarchy (fast & slow)	- All data initially in slow memory	- m = number of memory elements moved between fast and slow memory	- $t_m$ = time per slow memory operation (only care about bandwidth, NOT about latency)	- f = number of arithmetic operations	- $t_f$ = time per arithmetic operation << tm	- **CI** (Computational Intensity) = f / m: avarage number of flops per slow memory access	- Minimum possible time = f * $t_f$ when all data in fast memory	- Actual time = f * $t_f$ + m * $t_m$ = f * $t_f$ * (1 + $t_m$/$t_f$ * 1/**CI**)	- Larger **CI** means time closer to minimum f * tf. **CI** is the KEY to algorithm efficiency.	- $t_m$/$t_f$ is called the Machine Balance, is the KEY to machine efficiency.
+- Case Study - Matrix Multiplication
+	- 加速手段1: Blocked(Tiled) Matrix Multiply
+	- 加速手段2: Recursive Matrix Multiplication (不用知道缓存容量$M_{fast}$的大小）
+	- Cache Oblivious Methods 缓存无关算法 Cache-aware 缓存相关算法（需要知道$M_{fast}$）
+	- Alternate Data Layouts (例如Z-Morton order for recursion) to have better spatial locality
+	- **Throrem** (Communication lower bound, Hong & Kung, 1981): 
+		Any reorganization of Matrix Multiplication (using only community & associativity) has computational intensity CI = O(($M_{fast})^{1/2}$), so # of words moved between fast/slow memory = Ω($n^3 / (M_{fast})^{1/2}$)
+	- Strassen's Matrix Multiply, Asymptotically faster 渐进意义更快
+		MatMul: O($n^3$) → O($n^{2.81}$) [2.81 = $log_27$]	<img src="https://i.imgs.ovh/2025/08/14/tAkwH.png"  width="600" />
+	
+### Roofline Model
+- 3个关键指标 	- 【机器的】Arithmetic performance (flops/sec)	- 【机器的】Memory bandwidth (bytes/sec)	- 【算法的】Computational (Arithmetic) Intensity, CI (flops/word or flops/byte)
+
+		<img src="https://i.imgs.ovh/2025/08/15/KA6vg.png"  width="300" />
+		
+### UCB名词解释
 
 - Threads (线程) & Process (进程)- SRAM: Static Random-Access Memory（静态随机存取存储器）包括L1, L2, L3 cache等- DRAM: Dynamic Random-Access Memory（动态随机存取存储器）包括主内存、显存等- Cashe hit & Cashe miss
 	当CPU或计算单元请求的数据已经存在于缓存（Cache）中时，称为缓存命中（反之为miss）- Memory Benchmark	
-	内存基准测试，是指通过标准化测试程序或工具，评估计算机内存（DRAM、Cache、HBM等）的性能指标，包括：	- 带宽（Bandwidth）：单位时间内可读写的数据量（GB/s）	- 延迟（Latency）：从发起请求到获取数据的时间（纳秒级）。	- 吞吐量（Throughput）：系统在单位时间内能完成的内存操作次数。- ILP: Instruction Level Parallelism
+	内存基准测试，是指通过标准化测试程序或工具，评估计算机内存（DRAM、Cache、HBM等）的性能指标，包括：	- 带宽（Bandwidth）：单位时间内可读写的数据量（GB/s）	- 延迟（Latency）：从发起请求到获取数据的时间（纳秒级）。	- 吞吐量（Throughput）：系统在单位时间内能完成的内存操作次数。- HBM: High Bandwidth Memory, 高宽带内存- ILP: Instruction Level Parallelism
 - Pipelining
 - SIMD: Single Instruction Multiple 
 - FMA: Fused Multiply Add
 - CI: Computational Intensity, CI = f/m: average number of flops per slow memory access
 - Machine Balance: tm/tf, slow memory access time/fast arithmetic operation time- BLAS: Basic Linear Algebra Subroutines- NUMA: Non-Uniform Memory Access
+- SW prefetch: Software prefetching
 - POSIX: Portable Operating System Interface可移植操作系统接口- SpGEMM: Sparse General Matrix-Matrix Multiplication，稀疏通用矩阵乘法
 
 
