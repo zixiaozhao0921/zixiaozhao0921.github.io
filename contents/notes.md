@@ -36,19 +36,51 @@
 - 3个关键指标 	- 【机器的】Arithmetic performance (flops/sec)	- 【机器的】Memory bandwidth (bytes/sec)	- 【算法的】Computational (Arithmetic) Intensity, CI (flops/word or flops/byte)
 
 		<img src="https://i.imgs.ovh/2025/08/15/KA6vg.png"  width="300" />
-		
+
+### Parallel Programming with Threads, OpenMP
+
+- PThreads(一种threading library)
+
+	<img src="https://i.imgs.ovh/2025/08/16/K8Yw1.png"  width="400" />
+- OpenMP
+
+	<img src="https://i.imgs.ovh/2025/08/16/K84Ln.png"  width="600" />
+	
+	<img src="https://i.imgs.ovh/2025/08/16/K8K8r.png"  width="600" />
+
+- False Sharing是多线程/多核编程中一种常见的性能问题，其核心原因是：现代CPU的缓存以缓存行（通常64字节）​​为单位加载数据。当两个线程访问​同一缓存行内的不同变量​时，即使它们逻辑上无关，也会因​缓存一致性协议（如MESI）​​引发不必要的同步竞争，从而导致并行程序性能显著下降。
+- Padding, critical, for reduction(原理上也许是Padding) 是一些解决False Sharing的方法
+- 并行区域(#pragma omp parallel)内的变脸为private变量
+- 静态调度与动态调度 Static Schedule & Dynamic Schedule
+
+	<img src="https://i.imgs.ovh/2025/08/18/peiG4.png"  width="500" />
+	
+	<img src="https://i.imgs.ovh/2025/08/18/pstYX.png"  width="500" />
+
+- Data Sharing: Changing storage attributes
+
+	<img src="https://i.imgs.ovh/2025/08/18/p9D9c.png"  width="500" />
+	
+- ```#pragma omp tast```(配合```#pragma omp single```使用）
+
+	<img src="https://i.imgs.ovh/2025/08/18/pDXJg.png"  width="200" />
 ### UCB名词解释
 
 - Threads (线程) & Process (进程)- SRAM: Static Random-Access Memory（静态随机存取存储器）包括L1, L2, L3 cache等- DRAM: Dynamic Random-Access Memory（动态随机存取存储器）包括主内存、显存等- Cashe hit & Cashe miss
 	当CPU或计算单元请求的数据已经存在于缓存（Cache）中时，称为缓存命中（反之为miss）- Memory Benchmark	
 	内存基准测试，是指通过标准化测试程序或工具，评估计算机内存（DRAM、Cache、HBM等）的性能指标，包括：	- 带宽（Bandwidth）：单位时间内可读写的数据量（GB/s）	- 延迟（Latency）：从发起请求到获取数据的时间（纳秒级）。	- 吞吐量（Throughput）：系统在单位时间内能完成的内存操作次数。- HBM: High Bandwidth Memory, 高宽带内存- ILP: Instruction Level Parallelism
 - Pipelining
-- SIMD: Single Instruction Multiple 
+- SIMD: Single Instruction Multiple 所有处理单元在同一时刻执行相同指令（如CPU向量指令）
+- SPMD: Single Program Multiple Data 处理器可能通过条件分支处理不同逻辑（如if (threadID == 0) {...}）
 - FMA: Fused Multiply Add
 - CI: Computational Intensity, CI = f/m: average number of flops per slow memory access
 - Machine Balance: tm/tf, slow memory access time/fast arithmetic operation time- BLAS: Basic Linear Algebra Subroutines- NUMA: Non-Uniform Memory Access
 - SW prefetch: Software prefetching
-- POSIX: Portable Operating System Interface可移植操作系统接口- SpGEMM: Sparse General Matrix-Matrix Multiplication，稀疏通用矩阵乘法
+- POSIX: Portable Operating System Interface可移植操作系统接口
+- PThreads: The POSIX threading interface, support for
+	- Creating parallelism
+	- Synchronizing
+	- Implicit shared memory- SpGEMM: Sparse General Matrix-Matrix Multiplication，稀疏通用矩阵乘法
 
 
 ## CUDA
