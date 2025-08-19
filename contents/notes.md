@@ -143,7 +143,20 @@
 
 	<img src="https://i.imgs.ovh/2025/08/19/IfuSt.png" width="350" />
 	
+- Partial Differential Equations
+	- **Elliptic problems**(steady state, global space dependence)
+		
+		Electrostatic, Gravitational Potential - Potential(position)
+	- **Hyperbolic problems**(time dependent, local space dependence)
 
+		Sound waves - Pressure(position, time)
+	- **Parabolic problems**(time dependent, global space dependence)
+		
+		Heat flow - Temperature(position, time)
+		
+		Diffusion - Concentration(position, time)
+		
+	- Many problems combine features of above(Fluid flow, Elasticity)
 
 ### UCB名词解释
 
