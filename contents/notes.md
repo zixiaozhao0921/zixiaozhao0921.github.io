@@ -64,6 +64,87 @@
 - ```#pragma omp tast```(配合```#pragma omp single```使用）
 
 	<img src="https://i.imgs.ovh/2025/08/18/pDXJg.png"  width="200" />
+	
+### Sources of Parallelism and Locality in Simulation
+
+- Basic Kinds of Simulation
+	- Discrete event systems 离散空间 离散时间
+	- Particle systems 离散粒子系统(离散空间) 连续时间
+	- Lumped variables depending on continuous parameters 离散**物体**系统 连续时间 ODEs
+	- Continuous variables depending on continuous parameters 连续空间 连续时间 PDEs
+
+- Discrete Event Systems
+	- 系统有Finite set of variables
+	- state: 特定时间所有变量的取值
+	-  transition function: 每个变量的更新是一个关于其他变量的转移函数
+	-  系统可以是同步(sybchronous)的，也叫state machine，意味着每一个离散时间点都有明确的转移函数来更新
+	-  系统也可以是异步(asynchronous)的，也叫event driven simulation，意味着每一个状态是否转移到下一个状态取决于**输入是否发生变化(如相邻的格子有新物体出现)**
+	-  Domain Decomposition - 例: 矩形域分为9宫格并行计算，最小化通信成本(仅在边界处)
+	
+		<img src="https://i.imgs.ovh/2025/08/18/pKjoa.png"  width="400" />
+	
+	- Graph Partitioning 图划分问题, 可以算作一种特殊的Domain Decomposition
+	
+		<img src="https://i.imgs.ovh/2025/08/18/pK2W1.png"  width="400" />
+	
+	- Asynchronizing的两种方式: conservative & Speculative(Optimistic)
+	
+		<img src="https://i.imgs.ovh/2025/08/18/pKKia.png" width="370" />
+		
+	- 解决conservative的deadlock的方法: Are you stuck too?
+	
+		<img src="https://i.imgs.ovh/2025/08/18/pKx9A.png" width="375" />
+		
+- Particle Systems
+	- a finite number of particles
+	- 主要有三种力, 整个场存在的external force, 临近粒子之间的nearby force, 还有任何两两粒子之间的far-field force
+
+		<img src="https://i.imgs.ovh/2025/08/18/pmpub.png" width="400" />
+	- external force只有每个粒子单独相关, "embarrasingly parallel"
+	- nearby force的计算需要考虑通信，因此需要domain decomposition
+
+		<img src="https://i.imgs.ovh/2025/08/18/pu2ne.png" width="400" />
+	- 考虑到load balance(粒子可能分布不均匀), 可能需要dynamic decompostion
+
+		<img src="https://i.imgs.ovh/2025/08/18/puIbU.png" width="400" />
+	
+	- far-field force避免$O(n^2)$的方法：Particle Mesh方法——将所有粒子近似到regular mesh上计算，便可以利用FFT or Multigrid，复杂度为$O(nlogn)$或$O(n)$
+
+		<img src="https://i.imgs.ovh/2025/08/18/pu3E6.md.png" width="400" />
+		
+	- far-field force的第二种方法是Tree Decomposition，同样复杂度为$O(nlogn)$或$O(n)$
+	- far-field force的方法还有Barnes-Hut, Fast multipole method (FMM) by Greengard/Rohklin, Anderson s method.
+
+- Lumped Variable Systems
+	- Systems of "lumped" variables
+	- Each depends on continuous parameter (usually time)
+	
+		<img src="https://i.imgs.ovh/2025/08/19/Ij1uC.png" width="400" />
+
+		<img src="https://i.imgs.ovh/2025/08/19/IcHs4.png" width="400" />
+		
+	- 解ODE的方法1：显式方法，归结为sparse-matrix-vector mult.
+	- 解ODE的方法2：隐式方法，归结为solve linear systems
+	- 求解linear systems的直接方法：Gauss消元，LU分解，考虑dense和sparse两种情况
+	- 求解linear systems的迭代方法：Jacobi, SOR, Conjugate Gradient, Multigrid...
+	- Lumped Systems还有Eigenproblems(地震共振等），同样分为dense和sparse两种情况，归结为sparse-matrix-vector multiplication, direct methods
+
+- Parallel Sparse Matrix-vector multiplication, 储存系数矩阵的格式-CSR, Compressed Sparse Row, 时间大部分花费在数组嵌套索引上
+	
+	<img src="https://i.imgs.ovh/2025/08/19/If8Fm.png" width="500" />
+	
+	- 将稀疏矩阵A分解为多个区域对应不同的processor，是一种Graph partitioning问题
+	
+	<img src="https://i.imgs.ovh/2025/08/19/Ifl5x.png" width="400" />
+	
+	<img src="https://i.imgs.ovh/2025/08/19/IfhHe.png" width="400" />
+	
+- 各大算法应用热力图
+
+	<img src="https://i.imgs.ovh/2025/08/19/IfuSt.png" width="350" />
+	
+
+
 ### UCB名词解释
 
 - Threads (线程) & Process (进程)- SRAM: Static Random-Access Memory（静态随机存取存储器）包括L1, L2, L3 cache等- DRAM: Dynamic Random-Access Memory（动态随机存取存储器）包括主内存、显存等- Cashe hit & Cashe miss
