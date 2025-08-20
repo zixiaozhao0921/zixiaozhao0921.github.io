@@ -157,6 +157,50 @@
 		Diffusion - Concentration(position, time)
 		
 	- Many problems combine features of above(Fluid flow, Elasticity)
+	
+	- Example: Heat Equation
+		
+		- 显式方法
+
+			<img src="https://i.imgs.ovh/2025/08/20/I4oQp.png" width="400" />
+		
+		- 三(五)对角矩阵的load balance和minimize communication很好做
+
+			<img src="https://i.imgs.ovh/2025/08/20/I4led.png" width="400"/>
+		
+		- 显式方法计算简捷, 但数值稳定性差, 时间步长有限制(足够小)
+
+		- 隐式方法
+
+			<img src="https://i.imgs.ovh/2025/08/20/I4tKg.png" width="400" />
+			
+		- 2D情况
+
+			<img src="https://i.imgs.ovh/2025/08/20/I4pO0.png" width="400" />
+			
+		- 高维情况各算法时间复杂度
+
+			<img src="https://i.imgs.ovh/2025/08/20/I4IgY.md.png" width="400" />
+			
+		- Application procedure: Converting mesh to a matrix, Reordering, Multigrid
+
+			<img src="https://i.imgs.ovh/2025/08/20/IE6q0.png" width="400" />
+			
+			<img src="https://i.imgs.ovh/2025/08/20/IE84Y.png" width="400" />
+			
+			<img src="https://i.imgs.ovh/2025/08/20/IEeib.png" width="250" />
+			
+- N-body problem, Matmul的优化(最小化communication)
+
+	<img src="https://i.imgs.ovh/2025/08/20/IEnIr.md.png" width="300" />
+	
+	<img src="https://i.imgs.ovh/2025/08/20/IElB4.png" width="270" />
+	
+	<img src="https://i.imgs.ovh/2025/08/20/IEw29.md.png" width="350" />
+	
+### Basics of GPUs
+
+
 
 ### UCB名词解释
 
@@ -175,6 +219,7 @@
 	- Creating parallelism
 	- Synchronizing
 	- Implicit shared memory- SpGEMM: Sparse General Matrix-Matrix Multiplication，稀疏通用矩阵乘法
+- PRAM (Parallel Random Access Machine，并行随机存取机器): 理论计算机科学中用于研究并行算法的一种抽象计算模型。它假设存在无限数量的处理器、共享内存以及无通信延迟的理想化并行环境，是分析并行算法时间复杂度和效率的基础工具。
 
 
 ## CUDA
