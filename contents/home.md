@@ -32,7 +32,9 @@ High Performance Computing
 	- [[Tutorial]](https://mfem.org/tutorial/)
 	- ...腾讯元宝AI上有历史流程记录
 - Parallel Computing
-
+	- [[Data Parallelism Algorithms]](https://dl.acm.org/doi/pdf/10.1145/7902.7903)
+	- UCB CS267 Lecture 9
+	- Segment scan加速SpMV原理, Parallel prefix cost on p “big” processors复杂度分析 (Lecture 8)
 
 #### My Computer
 

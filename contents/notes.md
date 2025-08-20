@@ -200,8 +200,113 @@
 	
 ### Basics of GPUs
 
+- GPU中的Branch语句串行化问题
+	
+	<img src="https://i.imgs.ovh/2025/08/20/ItMB9.png" width="400" />
+	
+- Synchronization, atomic operations
 
+	- Threads within a block may synchronize with barriers
+	- ```… Step 1 … __syncthreads(); … Step 2 …```
+	- Blocks coordinate via atomic memory operations
+		- e.g., increment shared pointer with atomicInc()
+		- Or use cooperative thread groups
 
+- Blocks must be independent (threads in a block can synchronize...)	
+- Memory Coalescing (内存合并访问)
+	- Successive 4W bytes ( W: warp size, 4: size of single word in
+bytes) memory can be accessed by a warp (W consecutive
+threads) in a single transaction.
+
+	<img src="https://i.imgs.ovh/2025/08/20/IuU6n.png" width="400" />
+
+### Data Parallel Algorithms
+
+- Memory Operation
+	- Unary Operators: A = array, B = f(A)
+	- Binary Operators: A, B = array, C = A + B
+	- Broadcast
+	- Strided and Scatter, Gather
+	- Masks
+		
+		<img src="https://i.imgs.ovh/2025/08/20/Iw19e.png" width="400" />
+	- Reduce (Sum, Max)
+	- Scan (+, Max) 前缀和 前缀最大值
+	- Scan的两种变体，Inclusive scan, Exclusive scan
+
+		<img src="https://i.imgs.ovh/2025/08/20/IXvLU.png" width="400" />
+		
+- Idealized Hardware and Performance Model
+	- Machine in **Ideal Cost Model** for Data Parallelism
+		- An **unbounded** number of processors
+		- Control overhead is free
+		- Communication is free
+	- Cost on this abstract machine is the algorithm's **span or depth**, $T_{\infty}$.
+		- Defines a lower bound on time on real machines
+		- For uniary or binary operations: $O(1)$
+		- For reductions and broadcasts: $O(logn)$, can be proved to be the lower bound of ideal cost if only use arbitrarily many **binary operations** machine (By binary tree)
+		- For Matmul (n by n): $O(logn)$
+
+			<img src="https://i.imgs.ovh/2025/08/20/IwaeY.md.png" width="350"/>
+			
+		- For scan (不止+, max, 任何支持结合律的binary operation都可以): $O(logn)$, Magic!
+
+			<img src="https://i.imgs.ovh/2025/08/20/Iwfy1.png" width="450"/>
+			
+- Non Trivial Applications of Data Parallelism Using Scans
+
+| 计算任务                                      | 时间复杂度       | 应用场景/相关人物                          |
+|-----------------------------------------------|------------------|--------------------------------------------|
+| Adding two n-bit integers                     | O(log n)         | -                                          |
+| Inverting n-by-n triangular matrices          | O(log² n)        | -                                          |
+| Inverting n-by-n dense matrices               | O(log² n)        | -                                          |
+| Evaluating arbitrary expressions              | O(log n)         | -                                          |
+| Evaluating recurrences                        | O(log n)         | -                                          |
+| 2D parallel prefix                            | -                | 图像分割 (Catanzaro & Keutzer)             |
+| Sparse-Matrix-Vector-Multiply (SpMV)          | -                | 使用分段扫描 (Segmented Scan)              |
+| Parallel page layout                          | -                | 浏览器布局 (Leo Meyerovich, Ras Bodik)     |
+| Solving n-by-n tridiagonal matrices           | O(log n)         | -                                          |
+| Traversing linked lists                       | -                | -                                          |
+| Computing minimal spanning trees              | -                | -                                          |
+| Computing convex hulls of point sets          | -                | -                                          |
+
+- Applications
+	- Stream Compression
+
+		<img src="https://i.imgs.ovh/2025/08/20/hZS5H.png" width="400" />
+	- Radix Sort (基数排序) 
+
+		<img src="https://i.imgs.ovh/2025/08/20/hZLdU.md.png" width="400"/>
+		
+		<img src="https://i.imgs.ovh/2025/08/20/hZU0X.png" width="400"/> 
+		
+	- List Ranking with Pointer Doubling
+
+		<img src="https://i.imgs.ovh/2025/08/20/hZVzQ.png" width="400"/>
+		
+	- Fibonacci via Matrix Multiply Prefix
+
+	- Adding n-bit integers in $O(logn)$ time (思想和Fibonacci一样, 递推式转为矩阵形式)
+
+		<img src="https://i.imgs.ovh/2025/08/20/hZRS9.png" width="400"/>
+		
+		<img src="https://i.imgs.ovh/2025/08/20/hZzXm.png" width="400"/>
+		
+	- Lexical analysis (tokenizing, scanning)
+
+	- Inverting triangular n-by-n matrices in $O(log_2 n)$ time
+
+		<img src="https://i.imgs.ovh/2025/08/20/hZkhp.png" width="400"/>
+		
+	- Inverting Dense n-by-n matrices in $O(log_2 n)$ time, Completely numerically unstable
+	-  Segment Scans
+
+		<img src="https://i.imgs.ovh/2025/08/20/hZ5j6.png" width="400"/>
+		
+	- Parallel prefix cost on p “big” processors
+		
+		<img src="https://i.imgs.ovh/2025/08/20/hZ66O.png" width="400"/>
+		
 ### UCB名词解释
 
 - Threads (线程) & Process (进程)- SRAM: Static Random-Access Memory（静态随机存取存储器）包括L1, L2, L3 cache等- DRAM: Dynamic Random-Access Memory（动态随机存取存储器）包括主内存、显存等- Cashe hit & Cashe miss
@@ -220,6 +325,7 @@
 	- Synchronizing
 	- Implicit shared memory- SpGEMM: Sparse General Matrix-Matrix Multiplication，稀疏通用矩阵乘法
 - PRAM (Parallel Random Access Machine，并行随机存取机器): 理论计算机科学中用于研究并行算法的一种抽象计算模型。它假设存在无限数量的处理器、共享内存以及无通信延迟的理想化并行环境，是分析并行算法时间复杂度和效率的基础工具。
+- SMEM: Shared Memory
 
 
 ## CUDA
