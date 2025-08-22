@@ -35,6 +35,7 @@ High Performance Computing
 	- [[Data Parallelism Algorithms]](https://dl.acm.org/doi/pdf/10.1145/7902.7903)
 	- UCB CS267 Lecture 9
 	- Segment scan加速SpMV原理, Parallel prefix cost on p “big” processors复杂度分析 (Lecture 8)
+	- Distributed Memory Machine的Network Topology——butterfly的设计原理, MPI Programming实践(Lecture 9)
 
 #### My Computer
 
@@ -119,7 +120,7 @@ High Performance Computing
 	- [[Roofline Model CSDN-1]](https://download.csdn.net/blog/column/9003100/141645388)
 	- [[Roofline Model CSDN-2]](https://blog.csdn.net/m0_57102661/article/details/144042331)
 	- [[Roofline Model 知乎]](https://zhuanlan.zhihu.com/p/663545398)
-
+	- [[Paper Reading: Partitioned Global Address Space Languages (分区全局地址空间语言)]](https://zhuanlan.zhihu.com/p/622382722)
 
 
 

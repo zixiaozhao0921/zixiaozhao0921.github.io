@@ -307,6 +307,120 @@ threads) in a single transaction.
 		
 		<img src="https://i.imgs.ovh/2025/08/20/hZ66O.png" width="400"/>
 		
+### Distributed Memory Machines and Programming
+
+- Network Anaology
+	- Distributed Memory Machines里面的数据交换不像Shared Memory，"Not just a bus"
+	- Networks are like streets:
+		- **Link** = street
+		- **Switch** = intersection
+		- **Distances(hops)** = number of blocks traveled
+		- **Routing algorithm** = travel plan
+	- Design Characteristics of a Network
+		- **Topology**: crossbar, ring, 2-D, 3-D, higher-D mesh or torus, hypercube, tree, butterfyl, perfect shuffle, dragon fly
+		- **Routing algorithm**: avoids deadlock
+		- **Switching strategy**: Circuit switching, Packet switching
+		- **Flow control**: deal with congestion, Using Stall, store data temporarily in buffers...
+		- **Latency**: Vendors often report hardware latencies (wire time), Application programmers care about software latencies (user program to user program)
+		- **Overhead**(开销)​​ 指消息从发送方到接收方过程中，由软件或硬件引入的额外处理延迟，是系统延迟的主要来源。其核心特征如下：
+			- 主导性​: 软件/硬件开销（10–100微秒）远超硬件传输延迟（每跳10–100纳秒），尤其在频繁小消息场景中成为关键瓶颈。
+			- 组成:
+				- ​软件开销​: 用户程序与通信协议栈的交互（如数据序列化、内存拷贝、上下文切换）。
+				- ​硬件开销: 网卡处理、中断响应等底层操作。
+			- ​跨架构差异​: 不同网络设计的开销可能相差1–2个数量级，是优化延迟的核心突破口。
+		- **Diameter**: the maximum (over all pairs of nodes) of the shortest path between a given pair of nodes
+		- **Bisection bandwidth**: bandwidth across smallest cut that divides network into two equal halves
+			
+			<img src="https://i.imgs.ovh/2025/08/22/hmxo6.png" width="400" />
+			
+	- Different Designs of Network
+		- **Linear array**: Diameter = $n-1$, Bisection bandwidth = $1$; 
+		- **Torus of Ring**: Diameter = $n/2$, Bisection bandwidth = $2$;
+		- **2-D mesh**: Diameter = $2*(\sqrt{n}-1)$, Bisection bandwidth = $\sqrt{n}$;
+		- **2-D torus**: Diameter = $\sqrt{n}$, Bisection bandwidth = $2*\sqrt{n}$;
+		- **Hypercubes**: Diameter = $d$, Bisection bandwidth = $n/2$ (Number of nodes $n=2^d$ for dim = $d$;
+			
+			<img src="https://i.imgs.ovh/2025/08/22/huSst.png" width="400" />
+		- **Trees**: Diameter = $logn$, Bisection bandwidth = $1$, Easy layout as planar graph
+		- **Fat Trees** can avoid bisection bandwidth problem (cost more money(HW) but more efficiency)
+
+			<img src="https://i.imgs.ovh/2025/08/22/huEqn.png" width="400" />
+		- **Butterfles**:
+		
+			<img src="https://i.imgs.ovh/2025/08/22/hudEL.md.png" width="400" />
+		
+		- **Dragonfly**: 近距离用电缆远距离用光缆
+
+			<img src="https://i.imgs.ovh/2025/08/22/hx2AA.png" width="400" />
+	
+	- Randomized Routing: Minimal routing works well when things are load balanced, but potentially
+catastrophic in adversarial traffic patterns.
+		
+		<img src="https://i.imgs.ovh/2025/08/22/hxJwH.md.png" width="400"/>
+		
+- Programming Distributed Memory Machines with Message Passing
+
+	- Novel Features of MPI
+		1. Communicators (通信器): 封装独立的通信空间 (如 ```MPI_COMM_WORLD```), 隔离不同库或模块的通信域，避免消息冲突
+			- 支持子组划分 (```MPI_Comm_split```)，实现逻辑上的进程分组
+			- 确保线程安全 (如多线程中每个线程使用独立通信器)
+		2. Datatypes (数据类型)​​：定义复杂数据结构（如结构体、非连续内存块），减少数据拷贝开销，支持异构系统通信
+			- 示例：使用 ```MPI_Type_create_struct``` 描述混合数据类型的消息
+			- 直接发送非连续数据（如矩阵子块），避免手动打包
+		3. Multiple Communication Modes (多种通信模式)​​：提供不同语义的通信模式，精确控制缓冲区管理
+			- 标准模式​（```MPI_Send```）：由 MPI 管理缓冲区，可能阻塞
+			- ​同步模式​（```MPI_Ssend```）：接收方就绪后才完成发送
+			- ​就绪模式​（```MPI_Rsend```）：假设接收方已就绪（需用户保证安全性）
+			- ​非阻塞模式​（```MPI_Isend```）：异步通信，重叠计算与通信
+		4. ​Extensive Collective Operations (集合操作)​​：优化全局通信（如广播、规约、散射/聚集）
+			- ```MPI_Bcast```：向所有进程广播数据
+			- ```MPI_Reduce```：并行规约（如求和、最大值）
+			- ```MPI_Alltoall```：全交换（用于矩阵转置等场景）
+		5. Process Topologies (进程拓扑)​​：将逻辑进程映射到物理硬件拓扑（如网格、环）
+			- 虚拟拓扑（```MPI_Cart_create``` 创建笛卡尔网格）
+			- 邻居发现（```MPI_Cart_shift``` 获取相邻进程）
+			- 提升数据局部性，使通信密集的进程在物理上靠近
+		6. ​Profiling Interface (分析接口)​​：通过包装函数（如 ```PMPI_``` 前缀）标准化性能分析
+			- 支持第三方工具（如 Vampir、Intel Trace Analyzer）
+			- 低开销记录通信耗时、消息大小等指标 
+			
+	- A Simple Example
+
+```
+#include "mpi.h"
+#include <stdio.h>
+int main(int argc, char *argv[])
+{
+    int rank, buf;
+    MPI_Status status;
+    
+    MPI_Init(&argc, &argv);
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+
+    /* Process 0 sends and Process 1 receives */
+    if (rank == 0) {
+        buf = 123456;
+        MPI_Send(&buf, 1, MPI_INT, 1, 0, MPI_COMM_WORLD);
+    }
+    else if (rank == 1) {
+        MPI_Recv(&buf, 1, MPI_INT, 0, 0, MPI_COMM_WORLD, &status);
+        printf("Received %d\n", buf);
+    }
+
+    MPI_Finalize();
+    return 0;
+}
+```
+
+### Advanced MPI and Collective Communication Algorithms
+
+- More MPI
+
+
+
+- MPI RMA (one-sided communication)
+
+
 ### UCB名词解释
 
 - Threads (线程) & Process (进程)- SRAM: Static Random-Access Memory（静态随机存取存储器）包括L1, L2, L3 cache等- DRAM: Dynamic Random-Access Memory（动态随机存取存储器）包括主内存、显存等- Cashe hit & Cashe miss
@@ -326,6 +440,9 @@ threads) in a single transaction.
 	- Implicit shared memory- SpGEMM: Sparse General Matrix-Matrix Multiplication，稀疏通用矩阵乘法
 - PRAM (Parallel Random Access Machine，并行随机存取机器): 理论计算机科学中用于研究并行算法的一种抽象计算模型。它假设存在无限数量的处理器、共享内存以及无通信延迟的理想化并行环境，是分析并行算法时间复杂度和效率的基础工具。
 - SMEM: Shared Memory
+- MPI: Massage Passing Interface
+- SPMD: Single Program Multiple Data (MPI的编译原理)
+- Radix: 在 ​Distributed Memory Machine​​中，​Network Topology​​的 ​Radix​（基数）是指 ​每个交换节点（Switch Node）支持的直连链路数量，也称为 ​交换节点的端口数（Port Count）​。它直接决定了网络的连接能力和扩展性。 
 
 
 ## CUDA
