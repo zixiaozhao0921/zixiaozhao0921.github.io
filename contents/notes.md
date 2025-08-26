@@ -808,6 +808,97 @@ int main(int argc, char *argv[]) {
 ### Ray: A universal framework for distributed computing
 
 
+### Structured Grids
+
+<img src="https://i.imgs.ovh/2025/08/26/uxyKQ.png" width="400"/>
+
+- Jacobi Method
+	- Poisson Equation says: u(i, j) = (u(i-1, j) + u(i+1, j) + u(i, j-1) + u(i, j+1) + b(i, j)) / 4
+	- 记u(i, j, m)为第m次迭代的解
+	- u(i, j, m+1) = (u(i-1, j, m) + u(i+1, j, m) + u(i, j-1, m) + u(i, j+1, m) + b(i, j)) / 4 即为Jacobi迭代
+	- Steps to converge proportional to problem size $N=n^2$
+	- Therefore, serial complexity is $O(N^2)$
+	- Jacobi每次取相邻点更新，所以有**有限传播速度**
+		
+		<img src="https://i.imgs.ovh/2025/08/26/uxcNc.png" width="400"/>
+		
+	- Parallize Jacobi 就是利用了有限传播速度，take k>>1 iterations for the communication cost of 1 iteration
+
+		<img src="https://i.imgs.ovh/2025/08/26/uxrUp.png" width="400"/>
+	
+	- Do a little bit redundant arithmetic, but saves quite communications
+	- 2D Case: 
+
+		<img src="https://i.imgs.ovh/2025/08/26/uxvW6.md.png" width="400"/>
+		
+- Red-black Gauss-Seidel
+	
+	- converges twice as fast as Jacobi, but there are twice as many parallel steps, so the same in practice
+	<img src="https://i.imgs.ovh/2025/08/26/uxTsg.png" width="400" />
+	
+- SOR, Successive overrelaxalation
+	- Idea: The basic step in algorithm as: u(i, j, m+1) = u(i, j, m) + correction(i, j, m)
+	- If correction is a good direction, then one should move further than 1: u(i, j, m+1) = u(i, j, m) + w * correction(i, j, m)
+	- We can prove $w = \frac{2}{1+sin(\frac{\pi}{n+1})}$ for best convergence for Poisson
+	- Number of steps to converge = parallel complexity = $O(n)$, instead of $O(n^2)$ for Jacobi
+	- Serial complexity $O(n^3)=O(N^{3/2})$, instead of $O(n^4)=O(N^2)$ for Jacobi
+
+- CG, Conjugate Gradient
+	
+	<img src="https://i.imgs.ovh/2025/08/26/uxqWx.png" width="500"/>
+	
+- Multigrid
+	- Motivation
+		- Recall that Jacobi, SOR, CG, or any other sparse-matrix-vector-multiply-based algorithm can only move information one grid cell at a time (Take at least n steps to move information across n x n grid)
+		- Therefore, converging in O(1) steps requires moving information across grid faster than to one neighboring grid cell per step (One step can’t just do sparse-matrix-vector-multiply)
+	- Algorithm
+		- Replace problem on fine grid by an approximation on a coarser grid
+		- Solve the coarse grid problem approximately, and use the solution as a starting guess for the fine-grid problem, which is then iteratively updated
+		- Solve the coarse grid problem recursively, i.e. by using a still coarser grid approximation, etc.
+	- Success depends on **coarse grid solution being a good approximation to the fine grid**!
+	- Multigrid Sketch in 2D
+
+		<img src="https://i.imgs.ovh/2025/08/26/ux8vr.md.png" width="400" />
+		
+	- Multigrid V-Cycle Algorithm
+
+		<img src="https://i.imgs.ovh/2025/08/26/uxesh.md.png" width="400" />
+		
+		- 重要理解: Each level in a V-Cycle reduces the error in one part of the frequency domain
+
+			<img src="https://i.imgs.ovh/2025/08/26/uxspe.png" width="400" />
+			
+			- Convergence Picture of Multigrid in 1D
+
+			<img src="https://i.imgs.ovh/2025/08/26/uxnV4.png" width="400"/>
+			
+		- The restriction operator $R$ can do sampling or averaging
+
+			<img src="https://i.imgs.ovh/2025/08/26/uxP4q.md.png" width="400" />
+			
+		
+	- Weighted Jacobi: able to damp high frequency error
+		- At level i, pure Jacobi says: x(j) = 1/2 * (x(j-1) + x(j+1) + b(j))
+		- But Weighted Jacobi says: x(j) = 1/3 * (x(j-1) + x(j) + x(j+1) + b(j))
+
+	- Parallel in Multigrid
+
+		<img src="https://i.imgs.ovh/2025/08/26/ux2nA.md.png" width="400" />
+		
+		
+|          | # Flops               | # Messages     | # Words sent            |
+|----------|-----------------------|----------------|-------------------------|
+| Multigrid       | $N/p + log p * log N$   | $(log N)^2$      | $(N/p)^{1/2} + log p * log N$ |
+| FFT      | $N log N / p$           | $p^{1/2}$        | $N/p$                     |
+| SOR      | $N^{3/2} / p$           | $N^{1/2}$        | $N/p$                     |
+
+- SOR is slower than others on all counts
+- Flops for MG depends on accuracy of MG
+- MG communicates less total data (bandwidth)
+- Total messages (latency) depends …
+
+
+
 ### Parallel Spectral Methods: Fast Fourier Transform (FFT) with Applications
 
 - DFT简介
