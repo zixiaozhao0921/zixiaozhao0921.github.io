@@ -17,6 +17,15 @@ High Performance Computing
 
 ### TODO List
 
+- TOP TO DO: Poisson Solver using FFT on GPU
+
+| 论文标题 | 主要内容 |
+|---------|----------|
+| **An Optimized FFT-Based Direct Poisson Solver on CUDA GPUs**<br>《基于CUDA GPU的优化FFT泊松求解器》 | 提出针对NVIDIA GPU的高度多线程FFT泊松求解器，通过内存访问优化（128字节合并事务）、计算与FFT维度交错策略提升性能。支持全周期边界及混合（二维周期+一维Neumann）边界条件，在Tesla/Fermi架构实现140-375 GFLOPS性能。<br>**核心价值**：GPU内存优化、FFT交错策略、边界条件实现、性能基准测试 |
+| **FINITE DIFFERENCE METHODS FOR POISSON EQUATION**<br>《泊松方程的有限差分法》 | 系统阐述泊松方程的有限差分法，包括Dirichlet/Neumann边界处理（幽灵点技术）、误差分析（$\|u_I - u_h\|_\infty \leq Ch^2$）及Cell-centered网格变体。提供二阶精度公式推导及MATLAB伪代码。<br>**核心价值**：幽灵点边界处理、误差估计、Cell-centered差分、兼容性条件 |
+| **3.5 Finite Differences and Fast Poisson Solvers**<br>《3.5 有限差分与快速泊松求解器》 | 从数值线性代数角度解析泊松求解：1）Kronecker积构建二维差分矩阵 2）FFT法利用可分离特征向量（$y_{kl} = \sin\frac{ik\pi}{N+1}\sin\frac{jl\pi}{N+1}$）实现$O(N^2\log N)$复杂度 3）对比消元法/循环约简/FFT性能。<br>**核心价值**：Kronecker积、可分离特征向量、FFT复杂度分析、FACR算法 |
+| **The Discrete Cosine Transform**<br>《离散余弦变换》 | 解析8种DCT变体（DCT-1至DCT-8）的数学基础：1）证明DCT基向量为对称二阶差分矩阵的特征向量 2）边界条件（网格点/中点中心）决定基函数形式 3）关联FFT实现（式7）及图像处理应用（JPEG/MLT）。<br>**核心价值**：DCT正交性证明、边界中心化、图像压缩应用、重叠变换 |
+
 - CUDA基础、CUDA Profiling
 	- Nsight Systems [[b站教程]](https://www.bilibili.com/video/BV1UP411s7nE/?spm_id_from=333.337.search-card.all.click&vd_source=b2fcf1c28abf8bb0d1f1c65bb8775bd0)
 	- Roofline model [[b站教程]](https://www.bilibili.com/video/BV1f34y1G741?spm_id_from=333.788.videopod.sections&vd_source=b2fcf1c28abf8bb0d1f1c65bb8775bd0)
@@ -26,8 +35,6 @@ High Performance Computing
 	- 了解构建工具[[历史介绍]](https://baijiahao.baidu.com/s?id=1835925238778529521&wfr=spider&for=pc) [[CMake官方文档]](https://cmake.org/documentation/) [[CMake入门指南博客]](https://blog.csdn.net/wallwayj/article/details/147456408)
 	- CUDA Tutorial 初级系列(矩阵乘优化) 中级系列(Reduce优化,GEMM优化,卷积优化)[[Github教程]](https://github.com/PaddleJitLab/CUDATutorial)
 	- CUDA基础例子-加速矩阵运算[[知乎学习日记]](https://zhuanlan.zhihu.com/p/640086961)
-- Poisson Solver Using FFT on GPU
-	- 《The Discrete Cosine Transform, Gilbert Strang》
 - mfem
 	- [[Tutorial]](https://mfem.org/tutorial/)
 	- ...腾讯元宝AI上有历史流程记录
@@ -36,6 +43,8 @@ High Performance Computing
 	- UCB CS267 Lecture 9
 	- Segment scan加速SpMV原理, Parallel prefix cost on p “big” processors复杂度分析 (Lecture 8)
 	- Distributed Memory Machine的Network Topology——butterfly的设计原理, MPI Programming实践(Lecture 9)
+	- ```MPI_COMM_SPLIT``` (Lecture 10)
+	- Why Substitute triangular solves $LX=B$ with multiply by $L^{-1}$? (Lecture 14)
 
 #### My Computer
 
@@ -121,7 +130,11 @@ High Performance Computing
 	- [[Roofline Model CSDN-2]](https://blog.csdn.net/m0_57102661/article/details/144042331)
 	- [[Roofline Model 知乎]](https://zhuanlan.zhihu.com/p/663545398)
 	- [[Paper Reading: Partitioned Global Address Space Languages (分区全局地址空间语言)]](https://zhuanlan.zhihu.com/p/622382722)
-
+	- [[LAPACK]](www.netlib.org/lapack)
+	- [[Templates]](www.netlib.org/templates)
+	- [[Applied Numerical Linear Algebra]](gams.nist.gov)
+	- [[Scalapack]](www.netlib.org/scalapack)
+	- [[Etemplates]](www.cs.utk.edu/~dongarra//etemplates)
 
 
 

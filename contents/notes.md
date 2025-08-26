@@ -50,7 +50,7 @@
 
 - False Sharing是多线程/多核编程中一种常见的性能问题，其核心原因是：现代CPU的缓存以缓存行（通常64字节）​​为单位加载数据。当两个线程访问​同一缓存行内的不同变量​时，即使它们逻辑上无关，也会因​缓存一致性协议（如MESI）​​引发不必要的同步竞争，从而导致并行程序性能显著下降。
 - Padding, critical, for reduction(原理上也许是Padding) 是一些解决False Sharing的方法
-- 并行区域(#pragma omp parallel)内的变脸为private变量
+- 并行区域(#pragma omp parallel)内的变量为private变量
 - 静态调度与动态调度 Static Schedule & Dynamic Schedule
 
 	<img src="https://i.imgs.ovh/2025/08/18/peiG4.png"  width="500" />
@@ -361,7 +361,7 @@ catastrophic in adversarial traffic patterns.
 - Programming Distributed Memory Machines with Message Passing
 
 	- Novel Features of MPI
-		1. Communicators (通信器): 封装独立的通信空间 (如 ```MPI_COMM_WORLD```), 隔离不同库或模块的通信域，避免消息冲突
+		1. Communicators (通信器): 封装独立的通信空间 (如 ```MPI_COMM_WORLD```是默认通信器), 隔离不同库或模块的通信域，避免消息冲突
 			- 支持子组划分 (```MPI_Comm_split```)，实现逻辑上的进程分组
 			- 确保线程安全 (如多线程中每个线程使用独立通信器)
 		2. Datatypes (数据类型)​​：定义复杂数据结构（如结构体、非连续内存块），减少数据拷贝开销，支持异构系统通信
@@ -372,6 +372,7 @@ catastrophic in adversarial traffic patterns.
 			- ​同步模式​（```MPI_Ssend```）：接收方就绪后才完成发送
 			- ​就绪模式​（```MPI_Rsend```）：假设接收方已就绪（需用户保证安全性）
 			- ​非阻塞模式​（```MPI_Isend```）：异步通信，重叠计算与通信
+			- ```MPI_Bsend```: Supply own space as buffer for send
 		4. ​Extensive Collective Operations (集合操作)​​：优化全局通信（如广播、规约、散射/聚集）
 			- ```MPI_Bcast```：向所有进程广播数据
 			- ```MPI_Reduce```：并行规约（如求和、最大值）
@@ -383,10 +384,10 @@ catastrophic in adversarial traffic patterns.
 		6. ​Profiling Interface (分析接口)​​：通过包装函数（如 ```PMPI_``` 前缀）标准化性能分析
 			- 支持第三方工具（如 Vampir、Intel Trace Analyzer）
 			- 低开销记录通信耗时、消息大小等指标 
-			
+		7. 还有```MPI_Request, MPI_Test, MPI_Wait, MPI_Waitall```等语句，相当于```barrier, synchronize```
 	- A Simple Example
 
-```
+	```
 #include "mpi.h"
 #include <stdio.h>
 int main(int argc, char *argv[])
@@ -410,18 +411,531 @@ int main(int argc, char *argv[])
     MPI_Finalize();
     return 0;
 }
-```
+	```
+
+	- tag 是 ```MPI_RECV``` 和 ```MPI_SEND``` 函数中的一个关键参数，用于区分不同类型的消息。它的作用类似于邮件系统中的“邮件标签”或“主题分类”，帮助接收方精确识别和处理特定消息。例如：进程 A 发送两个消息，进程 B 可选择接收特定标签的消息。
+	
+	```
+MPI_Send(data1, count, MPI_INT, dest, 0, MPI_COMM_WORLD);  // 标签=0（数据）
+MPI_Send(data2, count, MPI_INT, dest, 1, MPI_COMM_WORLD);  // 标签=1（控制指令）
+MPI_Recv(buffer, count, MPI_INT, source, 1, MPI_COMM_WORLD, &status); // 只接收标签=1的消息
+	```
+	
+	- 利用广播机制的例子	
+	
+	```	
+#include "mpi.h"
+#include <math.h>
+#include <stdio.h>
+int main(int argc, char *argv[]) {
+    int done = 0, n, myid, numprocs, i;
+    double PI25DT = 3.141592653589793238462643;
+    double mypi, pi, h, sum, x;
+
+    MPI_Init(&argc, &argv);
+    MPI_Comm_size(MPI_COMM_WORLD, &numprocs);
+    MPI_Comm_rank(MPI_COMM_WORLD, &myid);
+
+    while (!done) {
+        // 进程0读取用户输入
+        if (myid == 0) {
+            printf("Enter the number of intervals: (0 quits) ");
+            scanf("%d", &n);  // 修正OCR识别错误
+        }
+
+        // 广播区间数n到所有进程
+        MPI_Bcast(&n, 1, MPI_INT, 0, MPI_COMM_WORLD);
+
+        // 终止条件
+        if (n == 0) break;
+
+        // ============== 并行计算核心 ============== //
+        h = 1.0 / (double) n;       // 计算步长
+        sum = 0.0;                   // 初始化局部和
+
+        // 各进程计算分配到的区间 (数据并行)
+        for (i = myid + 1; i <= n; i += numprocs) {
+            x = h * ((double)i - 0.5);              // 中点坐标
+            sum += 4.0 / (1.0 + x * x);             // 修正函数：f(x)=4/(1+x²)
+        }
+        mypi = h * sum;                             // 当前进程的局部积分结果
+
+        // 汇总所有进程结果到进程0 (全局求和)
+        MPI_Reduce(&mypi, &pi, 1, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
+        // ========================================== //
+
+        // 进程0输出最终结果
+        if (myid == 0) {
+            printf("pi is approximately %.16f, Error is %.16f\n",
+                   pi, fabs(pi - PI25DT));  // 修正格式说明符
+        }
+    }
+
+    MPI_Finalize();
+    return 0;
+}
+	```	
+	
+- 截至目前所有MPI语法汇总
+	- ```#include "mpi.h"``` MPI库
+	- ```MPI_Comm_size(MPI_COMM_WORLD, &size)``` 获取processors数量，储存在size中
+	- ```MPI_Comm_rank(MPI_COMM_WORLD, &rank)``` 获取当前processor id，储存在rank中
+	- ```MPI_Init(&argc, &argv)``` 初始化MPI
+	- ```MPI_Finalize()``` 结束MPI
+	- ```MPI_COMM_WORLD``` 默认通信器
+	- ```mpirun -np 4 a.out``` 编译命令
+	- ```MPI_INT, MPI_DOUBLE...``` MPI中的类型
+	- ```MPI_ANY_TAG``` MPI通讯过程中会携带一个tag信息，类似于邮件的“主题”或“分类标签”，帮助接收方区分不同类型的消息。接收方可以指定具体 Tag，只接收匹配该标签的消息。```MPI_ANY_TAG```为通用类型
+	- ```MPI_Send(start, count, datatype, dest, tag, comm)``` 发送数据
+	- ```MPI_Recv(start, count, datatype, source, tag, comm, status)``` 接受数据, 需要同时匹配source和tag才会接受，接受的count要大于等于发送的count
+	- ```MPI_ANY_SOURCE``` 可以匹配任何source processor
+	- ```MPI_Status status``` 接受方可以通过```MPI_Status```类型的```status```参数得知消息来源source、标签tag、数据量count等关键信息，前两者可以使用语法```status.MPI_TAG, status.MPI_SOURCE```，数据量获取使用语法```MPI_Get_count(&status, datatype, &recvd_count)```
+	- ```MPI_Bcast(start, count, datatype, tag, commm)``` 广播数据
+	- ```MPI_Reduce(start, dest, count, datatype, reduce_op, root, comm)``` 规约操作
+	- ```MPI_Sendrecv``` 同时发送&接受，避免send和receive操作可能导致的deadlock
+	- ```MPI_Isend(start, count, datatype, dest, tag, comm, &request)``` Non-blocking operation 非阻塞操作，request参数(```MPI_Request```类型)记录数据发送是否完成
+	- ```MPI_Irecv(start, count, datatype, dest, tag, comm, &request)``` Non-blocking operation 非阻塞操作，request参数记录数据接受是否完成
+	- ```MPI_Wait(&request, &status)``` 该函数是一个阻塞操作，表示等待直到request对应的操作完成
+	- ```MPI_Test(&request, &flag, &status)``` 该函数是一个非阻塞操作，用于检查request对应的操作是否完成，结果将保存在bool类型的flag中
+	- ```MPI_Waitall(count, array_of_requests, array_of_statuses)```
+	- ```MPI_Waitany(count, array_of_requests, &index, &status)```
+	- ```MPI_Waitsome(count, array_of_requests, array_of indices, array_of_statuses)```
+	- ```MPI_Ssend``` Synchronous mode: the send does not complete until a matching receive has begun. (Unsafe programs deadlock.)
+	- ```MPI_Bsend``` Buffered mode: the user supplies a buffer to the system for its use. (User allocates enough memory to make an unsafe program safe.)
+	- ```MPI_Rsend``` Ready mode: user guarantees that a matching receive has been posted.
+		- Allows access to fast protocols
+		- undefined behavior if matching receive not posted
+	- ```MPI_Issend``` Non-blocking versions
 
 ### Advanced MPI and Collective Communication Algorithms
 
-- More MPI
+- Collective Data Movement
+	- Broadcast
+	- Scatter
+	- Gather
+	- Allgather
+	- Alltoall
+	- Reduce
+	- Scan
+	- `All` versions deliver results to all participating processes, not just root.
+	- `V` versions allow the chunks to have variable sizes.
+	- Many Routines: Allgather, Allgatherv, Allreduce, Alltoall, Alltoallv, Bcast, Gather, Gatherv, Reduce, Reduce_scatter, Scan, Scatter, Scatterv
 
+- MPI Built-in Collective Computation Operations
+	- `MPI_MAX` Maximum
+	- `MPI_MIN` Minimum
+	- `MPI_PROD` Product
+	- `MPI_SUM` Sum
+	- `MPI_LAND` Logical and
+	- `MPI_LOR` Logical or
+	- `MPI_LXOR` Logical exclusive or
+	- `MPI_BAND` Binary and
+	- `MPI_BOR` Binary or
+	- `MPI_BXOR` Binary exclusive or
+	- `MPI_MAXLOC` Maximum and location
+	- `MPI_MINLOC` Minimum and location
 
+- SUMMA, Scalable Universal Matrix Multiply Algorithm (Used in PBLAS, Parallel BLAS)
+
+	- Formula
+		$$
+		C(I,J) = C(I,J)+\sum_kA(I,K)*B(K,J)
+		$$
+	
+	- Naive version
+
+		<img src="https://i.imgs.ovh/2025/08/24/G1cIh.png" width="400" />
+	
+	- `MPI_Ibcast` 优化版本, 并行通信与本地计算, 同时用`MPI_Comm_split`将通信器分为row communicator和column communicator, 代码见Lecture 10
+	
+- `Allgather`内部算法
+	- Ring Algorithm: $T_{ring} = \alpha (p-1) + \beta n (p-1)/p$
+	- Recursive Doubling Algorithm: $T_{rec-dbl} = \alpha lg(p) + \beta n (p-1)/p$
+
+		<img src="https://i.imgs.ovh/2025/08/24/G1Xw4.png" width="300"/>
+	- Bruck Algorithm: $T_brock = \alpha \lceil{lg(p)}\rceil + \beta n (p-1)/p$，$p$较大时比Recursive Doubling稍快，因为Recursive的复杂度实际上是$2\alpha \lfloor{lg(p)}\rfloor + \beta n (p-1)/p$
+
+		<img src="https://i.imgs.ovh/2025/08/24/G11LA.png" width="500"/>
+
+- Hybrid Programming with Threads
+
+	- 三种模式: All MPI, MPI + OpenMP, MPI + Pthreads
+	- MPI's Four Levels of Thread Safety
+		- `MPI_THREAD_SINGLE`: 每个processor仅有一个线程，就是原始的MPI
+		- `MPI_THREAD_FUNNELED`: 每个processor多线程，只有main thread进行MPI
+		- `MPI_THREAD_SERIALIZED`: 每个processor多线程，同一时间只有一个thread进行MPI
+		- `MPI_THREAD_MULTIPLE`: 每个processor多线程，任何thread都可以进行MPI，需要注意race problem
+	- Hybriding时，初始化由`MPI_Init`变为`MPI_Init_thread（requested, provided)`
+	- 注意Ordering和Blocking问题
+
+		<img src="https://i.imgs.ovh/2025/08/24/G3zJ1.png" width="400"/>
 
 - MPI RMA (one-sided communication)
 
+	<img src="https://i.imgs.ovh/2025/08/24/G3gTL.png" width="500"/>
+	
+	- 为什么需要one-sided communication
 
-### UCB名词解释
+		<img src="https://i.imgs.ovh/2025/08/24/G3qmM.png" width="400" />
+
+	- RMA首先需要创建window
+		- `MPI_WIN_CREATE` already have an allocated buffer that you would like to make remotely accessible
+		- `MPI_WIN_ALLOCATE` create a buffer and directly make it remotely accessible
+		- `MPI_WIN_CREATE_DYNAMIC` don't have a buffer yet, but will have one in the future, want to dynamically add/remove buffers to/from the window
+		- `MPI_WIN_ALLOCATE_SHARED` want multiple processes on the same node share a buffer	
+	- MPI provides ability to read, write and atomically modify date in remotely accessible memory regions
+		- `MPI_PUT`
+		- `MPI_GET`
+		- `MPI_ACCUMULATE`
+		- `MPI_GET_ACCUMULATE`
+		- `MPI_COMPARE_AND_SWAP`
+		- `MPI_FETCH_AND_OP`
+
+### UPC++: Partitioned Global Address Space Languages
+
+
+
+### Dense Linear Algebra - History and Structure, Parallel Matrix Multiplication
+
+- Dense Linear Algebra包含的内容
+	- Linear Systems $Ax=b$
+	- Least Squares: choose $x$ to minimize $||Ax-b||^2$, 有各种变式 Overdetermined, underdetermined, unconstrained, constrained, weighted(ridge)
+	- Eigenvalues and vectors of Symmetric Matrices, 有Standard$Ax=\lambda x$, Generalized$Ax=\lambda Bx$
+	- Eigenvalues and vectors of Unsymmetric Matrices, 计算Eigenvalues, Schur form, eigenvectors, invariant subspaces, Standard, Generalized
+	- Singular Values and vetors (SVD), 有Standard, Generalized
+	- Different matrix structures - 28 types in LAPACK, 包括Real, complex, symmetric, Hermitian, positive definite, dense, triangular, banded
+	- Level of detail
+		- Simple Driver "$x=A\backslash b$"
+		- Eppert Drivers with error bounds, extra-precision, other options
+		- Lower level routines (apply certain orthogonal transformation, matmul)
+	- Randomized Versions
+
+- History of (Dense) Linear Algebra Software
+	- do-loop, EISPACK
+	- BLAS-1
+		- Standard library of 15 operations (mostly) on vectors
+		- Operations like AXPY
+		- do $O(n^1)$ ops on $O(n^1)$ data
+		- using libraries like LINPACK
+	- BLAS-2
+		- Standard library of 25 operations (mostly) on matrix/vector pairs
+		- Operations like GEMV: $y=\alpha A x + \beta y$, GER: $A=A+\alpha x y^T$, $x=T^{-1}x$
+		- do $O(n^2)$ ops on $O(n^2)$ data
+		- **CI** still ~2
+	- BLAS-3
+		- Standard library of 9 operations (mostly) on matrix/matrix pairs
+		- Operations like GEMM: $C=\alpha A B + \beta C$, $C=\alpha A A^T + \beta C$, $B=T^{-1}B$
+		- do $O(n^3)$ ops on $O(n^2)$ data
+		- **CI** now ~$n/2$, good!
+	- LAPACK (1989 - now), Linear Algebra PACKage
+	- ScaLAPACK (1995 - now), Scalable LAPACK
+		- For distributed memory using MPI
+		- More complex data structures, algorithm than LAPACK
+	- PLASMA, DLASMA, MAGMA (now)
+		- Ongoing extensions to Multicore/GPU/Heterogeneous
+	- Other related projects like SLATE, Elemental, FLAME
+
+- Matmul Communication Lower Bounds
+	- Single Processor
+		- Assume $n^3$ algorithm (no Strassen-like)
+		- Sequential Case (M = fast memory size) **Lower bound on #words moved** = $\Omega(n^3 / M^{1/2})$
+		- Attained using blocked or cache-oblivious algorithms
+	- P Processors
+		- M = fast memory per processor, assume load balance
+		- **Lower bound on #words moved** = $\Omega((n^3 / p) / M^{1/2})$
+		- 假设所有processor加到一起正好是所有内存($3n^2$)刚好储存, then $M=3n^2/p$, lower bound  = $\Omega (n^2 / p^{1/2})$
+		- Attained by SUMMA, Cannon's algorithm
+		- 此时需要考虑messages sent，理论最优情况下，每次sent message都是$M$大小
+		- **#words\_moved per processor** = $\Omega (\#flops / M^{1/2})$
+		- **#messages\_sent per processor** = $\Omega (\#flops / M^{3/2})$
+	- 总结如下
+		<img src="https://i.imgs.ovh/2025/08/24/mjHbd.png" width=550"/>
+	- Goals for algorithms
+		- Minimize #words moved
+		- Minimize #messages sent
+		- Minimize for multiple memory hierarchy levels
+		- Fewest flops when matrix fits in fastest memory
+
+- Parallel Data Layouts for Matrices
+	 2D Row and Column Block Cyclic Layout是理论上最好用的
+	
+	<img src="https://i.imgs.ovh/2025/08/24/mjJ2g.md.png" width="500"/>
+	
+- Parallel Matrix Multiply
+	- 目标: Computing $C=C+AB$
+	- 使用Basic Algorithm: $2n^3$ Flops (no Strassen like)
+	- 考虑的因素
+		- Data Layout: 1D, 2D, Others
+		- Topology of machine: Ring, Torus, 2DTorus, Others
+		- Scheduling communication
+	- Performance model: Message time = "latency" + #words * time per word = $\alpha + n \beta$
+	- 衡量指标之一, Efficiency = serial time / (p * parallel time), perfect (linear) speedup are **efficiency = 1**
+	- Communicates once at a time, 基本上就是serial computing
+
+		<img src="https://i.imgs.ovh/2025/08/24/mjh0M.png" width = "350" />
+		
+	- Pairs of adjacent processors can communicate simultaneously. (Nearly) Optimal for 1D layout on Ring or Bus, even with Broadcast! 
+
+		<img src="https://i.imgs.ovh/2025/08/24/mjGzr.png" width = "350"/>
+		
+		- $\text{Time of inner loop} = 2 \times \left(\alpha + \beta \times n^2/p\right) + 2 \times n \times \left(n/p\right)^2$
+		- $\text{Total Time} = 2 \times n \times \left(n/p\right)^2 + (p-1) \times \text{Time of inner loop} = 2n^3/p + 2p\alpha + 2\beta n^2$
+		- $\text{Parallel Efficiency} = 2*n^3 / (p*\text{Total Time}) = 1 / (1 + O(p / n))$
+		- Grows to $1$ as $n/p$ increases, but still far from communication lower bound
+
+- SUMMA, hits the lower bound on Matmul!
+
+	<img src="https://i.imgs.ovh/2025/08/24/mjBSa.png" width="500"/>
+
+- 如果多用一些内存，而非$M=n^2/p$，可以达到更好的效率，最好可以达到$c=P^{1/3}$ (理论上限). 但现实中没有这么多内存空间，通常是单独确定$c$，此时方法称为**2.5D SUMMA** 
+
+	<img src="https://i.imgs.ovh/2025/08/24/mjXDt.png" width="500"/>
+	
+	
+### Dense Linear Algebra - Parallel Gaussian Elimination and QR
+
+
+- MatMul的回顾
+	- Sequential communication goals
+		- \#words moved = $O(n^3/M^{1/2})$
+		- \#messages = $O(n^3/M^{3/2})$
+	- Parallel communication goals, with minimum memory $n^2/P$
+		- \#words moved = $O(n^2/P^{1/2})$
+		- \#messages = $O(P^{1/2})$
+	- Parallel communication goals, with c倍的minimum memory
+		- \#words moved = $O(n^2/(cP)^{1/2})$
+		- \#messages = $O(P^{1/2}/c^{3/2})$ for MatMul, $O((cP)^{1/2})$ for LU and QR
+
+- Sequential: Gauss Elimination Refinement
+	- Initial Version
+
+	```
+	V1:
+	for i = 1 to n - 1
+		for j = i + 1 to n
+			m = A(j, i) / A(i, i)
+			for k = i + 1 to n
+				A(j, k) = A(j, k) - m * A(i, k)
+	```
+		
+	<img src="https://i.imgs.ovh/2025/08/25/mlqXY.png" width="500" />
+	
+	- 不妨将m储存在A(j, i)中，将循环拆开 (目标是将循环尽可能改写为Matmul的形式)
+
+	```
+	V2:
+	for i = 1 to n - 1
+		for j = i + 1 to n
+			A(j, i) = A(j, i) / A(i, i)
+		for j = i + 1 to n
+			for k = i + 1 to n
+				A(j, k) = A(j, k) - A(j, i) * A(i, k)
+	V3:
+	for i = 1 to n - 1
+		A(i + 1 : n, i) = A(i + 1 : n, i) * (1 / A(i, i)) #BLAS-1 op, scale a vector
+		A(i + 1 : n, i + 1 : n) = A(i + 1 : n, i + 1 : n) - A(i + 1 : n, i) * A(i, i + 1 : n) #BLAS-2, rank-1 update
+	```
+	
+	<img src="https://i.imgs.ovh/2025/08/25/mlJSt.png" width="350" />
+	
+	- We call the stricly lower triangular matrix of multipliers $M$, let $L=I+M$, call the upper triangle of the final matrix $U$. That is $A=LU$ factorization.
+	- Next we consider numerical stability. It's needed to **pivot**. That is $A=PLU$ factorization.
+	- But pivot的过程是非常耗时的, Big idea: **Delayed Updates**
+		- Save updates to "trailing matrix" from several consecutive BLAS2 (rank-1) updates.
+		- Apply many updates simultaneously in one BLAS3 (matmul) operation
+		- Need to choose a **block size b** such that small enough (active submatrix consisting of b columns of A fits in cache) and large enough (make BLAS3 matmul fast)
+	
+	```
+	V4: LAPACK version
+	for ib = 1 to n - 1 step b
+		end = ib + b - 1
+		apply BLAS-2 version of GEPP to get A(ib : n, ib : end) = PLU
+		Let LL denote the strict lower triangular part of A(ib : end, ib : end) + I
+		A(ib : end, end + 1 : n) *= LL^-1
+		A(end + 1 : n, end + 1 : n) -=  A(end + 1 : n, ib : end) * A(end + 1 : n, end + 1 : n)
+	```
+	
+	<img src="https://i.imgs.ovh/2025/08/25/mtQec.png" width="300" />
+	
+	- Gauss Elimination 和 Matmul的效率等价性
+
+		<img src="https://i.imgs.ovh/2025/08/25/mKcxF.png" width="300"/>
+	
+	- LAPACK的GEMM实际上没有Minimize Communication
+
+		<img src="https://i.imgs.ovh/2025/08/25/mKHIC.png" width="450"/>
+		
+	- Alternative cache-oblivious GE formulation (Recursive)
+
+		<img src="https://i.imgs.ovh/2025/08/25/mpkHU.png" width="450"/>	
+- Parallel Gauss Elimination
+
+	- Distributed Gaussian Elimination with a 2D Block Cyclic Layout
+	- 这种方法叫做PDGESV (Parallel Distributed Gauss Elimination Solve) = ScaLAPACK Parallel LU
+
+		<img src="https://i.imgs.ovh/2025/08/25/mp9j9.png" width="450"/>
+		
+		<img src="https://i.imgs.ovh/2025/08/25/mpQ76.png" width="450" />
+		
+	- ScaLAPACK效率
+		- \#words sent = $O(n^2logP/P^{1/2}$
+		- \#messages sent = $O(nlogP)$ (与$n$相关，很大)
+	
+	- Next Goal: For each panel of b columns spread over $P^{1/2}$ procs, identify b "good" pivot rows in one reduction
+	- 这种factorization叫做 TSLU = "Tall Skinny LU"
+
+		<img src="https://i.imgs.ovh/2025/08/25/mIftc.png" width="400" />
+		
+	
+- Parallel QR, TSQR, 和TSLU的思路一样
+
+	<img src="https://i.imgs.ovh/2025/08/25/mIFR6.png" width="400"/>
+	
+- Multicore: Expressing Parallelism as a DAG (Directed Acyclic Graph)
+
+	<img src="https://i.imgs.ovh/2025/08/25/mI9Qe.png" width="400" />
+
+	<img src="https://i.imgs.ovh/2025/08/25/mIDua.png" width="400"/>
+
+### Machine Learning Part 1 (Supervised  Learning)
+
+
+
+### Machine Learning Part 2 (Unsupervised and semi-supervised learning)
+
+
+
+### Ray: A universal framework for distributed computing
+
+
+### Parallel Spectral Methods: Fast Fourier Transform (FFT) with Applications
+
+- DFT简介
+	- 一维DFT - $m$元素向量$v$的一维DFT定义为：
+		$$F \cdot v$$
+	其中$F$是$m \times m$矩阵，其元素定义为：		$$F[j,k] = \omega^{j \cdot k}, \quad 0 \leq j, k \leq m-1$$
+	这里$\omega$是复数：
+		$$\omega = e^{2\pi i / m} = \cos\left(\frac{2\pi}{m}\right) + i \cdot \sin\left(\frac{2\pi}{m}\right)$$
+	$\omega$是$m$次单位根，满足$\omega^m = 1$。
+
+	- 二维DFT - $m \times m$矩阵$V$的二维DFT定义为：
+		$$F \cdot V \cdot F$$
+	理解：1. 对所有列独立进行一维DFT 2. 对所有行独立进行一维DFT
+
+	- 高维DFT的计算方法与二维类似，通过逐维应用一维DFT实现。
+
+- Poisson Equation
+	- 1D Poisson equation: solve $L_1x=b$ where (3 point stencil)
+
+		$$
+		L_1 = \left( \begin{array}{ccccc} 
+2 & -1 &   &   &   \\ 
+-1 &  2 & -1 &   &   \\ 
+   & -1 &  2 & -1 &   \\ 
+   &    & -1 &  2 & -1 \\ 
+   &    &    & -1 &  2 \\ 
+\end{array} \right)
+		$$
+	- 2D Poisson equation: solve $L_2x=b$ where (5 point stencil)
+
+		$$
+		L_2 = \begin{bmatrix}
+4 & -1 & 0 & -1 & 0 & 0 & 0 & 0 & 0 \\
+-1 & 4 & -1 & 0 & -1 & 0 & 0 & 0 & 0 \\
+0 & -1 & 4 & 0 & 0 & -1 & 0 & 0 & 0 \\
+-1 & 0 & 0 & 4 & -1 & 0 & -1 & 0 & 0 \\
+0 & -1 & 0 & -1 & 4 & -1 & 0 & -1 & 0 \\
+0 & 0 & -1 & 0 & -1 & 4 & 0 & 0 & -1 \\
+0 & 0 & 0 & -1 & 0 & 0 & 4 & -1 & 0 \\
+0 & 0 & 0 & 0 & -1 & 0 & -1 & 4 & -1 \\
+0 & 0 & 0 & 0 & 0 & -1 & 0 & -1 & 4
+\end{bmatrix}
+		$$
+		
+	- 2D Poisson equation也可以看作 solve $L_1X+XL_1=B$ (5 point stencil, $X$为二维网格点构成的矩阵)
+
+	
+	- $ L_1 = F \cdot D \cdot F^T $ is eigen decomposition where
+		$$ F(j,k) = \left( \frac{2}{n+1} \right)^{1/2} \cdot \sin\left( \frac{j k \pi}{n+1} \right) $$
+		
+		$$ D(j,j) = 2 \left( 1 - \cos\left( \frac{j \pi}{n+1} \right) \right) $$
+		
+	- 对 $L_1X+XL_1=B$ 等式两侧做2维DFT，得到
+		$$ D(F^TXF)+(F^TXF)D = F^TBF $$
+		- Step 1: 计算$B'=F^TBF$
+		- Step 2: 计算$DX'+X'D=B'$, $X'(j,k) = B'(j,k) / \left(D(j, j) + D(k, k)\right)$
+		- Step 3: 计算$X=FX'F^T$
+
+	- For solving the Poisson equation and various other applications, we use variations on the FFT
+		- The sin transform -- imaginary part of F
+		- The cos transform -- real part of F
+	- Algorithms are similar, so we will focus on F
+
+- 一维FFT具体方法
+	- FFT same as evaluating a polynomial V(x) with degree m-1 at m different points. The call tree of the D&C (Divide and Conquer) FFT algorithm is a complete binary tree of log m levels.
+
+		<img src="https://i.imgs.ovh/2025/08/26/uRe6N.png" width="500" />
+		
+		<img src="https://i.imgs.ovh/2025/08/26/uRMAX.png" width="750"/>
+	
+	- 利用中间的Transpose步骤避免processors之间的communication
+
+		<img src="https://i.imgs.ovh/2025/08/26/uRo86.png" width="400"/>
+		
+		If no communication is pipelined, Time(transposeFFT) = $2nlog(m)/p + (p-1)\alpha + m(p-1)/p^2\beta$
+		If communication is pipelined, so $(p-1)\alpha$ turns out to be single $\alpha$
+	
+	- (Sequential Communication Complexity) FFT of size m, **\#words moved** between main memory and cache of size M (m>M):
+		- Thm (Hong, Kung, 1981) \#words = $\Omega(mlogm/logM)$
+		- Attained by Transpose algorithm (Sequental algorithm "simulates" parallel algorithm)
+		- Attrained by recursive, "cache-oblivious" algorithm (FFTW)
+
+	- (Parallel Communication Complexity) FFT of size m, **\#words moved** between p processors
+		- Thm (Aggarwal, Chandra, Snir, 1990) \#words = $\Omega(mlogm/\left(plogm/p\right))$
+		- Attained by Transpose algorithm
+			- Recall assumption $log(m/p)\geq log(p)$
+			- So $2\geq logm / log(m/p) \geq 1$
+			- So \#words = $\Omega(m/p)$
+
+- 高维FFT
+	- FFTs on 2 or more dimensions are defined as 1D FFTs on vectors in all dimensions.
+		- 2D FFT does 1D FFTs on all rows and then all columns
+
+	- There are 3 obvious possibilities for the 2D FFT:
+		1. 2D blocked layout for matrix, using parallel 1D FFTs for each row and column
+		2. Block row layout for matrix, using serial 1D FFTs on rows, followed by a transpose, then more serial 1D FFTs
+		3. Block row layout for matrix, using serial 1D FFTs on rows, followed by parallel 1D FFTs on columns
+	- Option 2 is best, if we overlap communication and computation
+
+	- Modified LogGP Model
+
+		<img src="https://i.imgs.ovh/2025/08/26/u8MR6.png" width="400"/>
+		
+	- GASNet Communications System – Used by UPC
+
+		<img src="https://i.imgs.ovh/2025/08/26/u84tn.png" width="400"/>
+		
+	- 3D FFT
+
+		<img src="https://i.imgs.ovh/2025/08/26/u8hQe.md.png" width="400"/>
+		
+		<img src="https://i.imgs.ovh/2025/08/26/u8xeq.md.png" width="400"/>
+	- Three different ways to break up the messages
+		1. Packed Slabs (i.e., single packed "All to all" in MPI)
+		2. Slabs (2D)
+		3. Pencils (1D)
+	- Slabs and Pencils allow overlapping communication and computation and leverage RMDA support in modern networks
+
+- FFTW (the "Fastest Fourier Transform in the West")
+
+	- C library for real & complex FFTs (arbitrary size/dim), also offer parallel versions for threads & MPI
+	- Computational kernels (80% of code) automatically generated
+	- Self-optimized for hardware = portability + performance
+	- FFTW implements many FFT algorithms: A **planner** picks the best composition by measuring the speed of different combinations.
+	- The resulting plan is executed with explicit recursion: enhance locality
+	- The base cases of the recursion are **codelete** highly-optimized dense code automatically generated by a special-purpose "compiler"
+		
+## UCB名词解释
 
 - Threads (线程) & Process (进程)- SRAM: Static Random-Access Memory（静态随机存取存储器）包括L1, L2, L3 cache等- DRAM: Dynamic Random-Access Memory（动态随机存取存储器）包括主内存、显存等- Cashe hit & Cashe miss
 	当CPU或计算单元请求的数据已经存在于缓存（Cache）中时，称为缓存命中（反之为miss）- Memory Benchmark	
@@ -443,6 +957,10 @@ int main(int argc, char *argv[])
 - MPI: Massage Passing Interface
 - SPMD: Single Program Multiple Data (MPI的编译原理)
 - Radix: 在 ​Distributed Memory Machine​​中，​Network Topology​​的 ​Radix​（基数）是指 ​每个交换节点（Switch Node）支持的直连链路数量，也称为 ​交换节点的端口数（Port Count）​。它直接决定了网络的连接能力和扩展性。 
+- RDMA: Remote Data Memory Access 远程数据内存访问, 是MPI的One-sided communication的方式
+- GAS: Global Address Space, 全局地址空间
+- NIC: Network Interface Card, 用于one-sided communication
+- GEPP: Gauss Elimination with Partial Pivoting
 
 
 ## CUDA
