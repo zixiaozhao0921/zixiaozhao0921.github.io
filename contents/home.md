@@ -119,7 +119,7 @@ High Performance Computing
 
 - Parallel Computing
 
-	- [[Applications of Parallel Computers 2022, UCB CS267-b站视频]](Applications of Parallel Computers 2022, UCB CS267)
+	- [[Applications of Parallel Computers 2022, UCB CS267-b站视频]](https://www.bilibili.com/video/BV1PS421978D/?spm_id_from=333.1007.top_right_bar_window_custom_collection.content.click&vd_source=b2fcf1c28abf8bb0d1f1c65bb8775bd0)
 	- [[Applications of Parallel Computers 2022, UCB CS267-官网]](https://sites.google.com/lbl.gov/cs267-spr2022)
 	- [[FFT solver for Poisson equation]](https://youjunhu.github.io/research_notes/particle_simulation/particle_simulationsu24.html)
 	- [[高性能计算的学习路线 知乎]](https://www.zhihu.com/question/33576416/answer/1243835966)
