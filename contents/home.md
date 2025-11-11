@@ -17,6 +17,10 @@ High Performance Computing
 
 ### TODO List
 
+- vim学习[[CSDN Blog]](https://blog.csdn.net/qq_40650558/article/details/104565133)
+
+- Pandas学习[[CSDN Blog]](https://blog.csdn.net/ZHINV_/article/details/146568499)
+
 - TOP TO DO: Poisson Solver using FFT on GPU
 
 | 论文标题 | 主要内容 |
