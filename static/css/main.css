@@ -38,9 +38,9 @@ small { color: #555; white-space: nowrap; }
 footer { border-top: 1px solid var(--rule); }
 .course-groups { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 210px), 1fr)); gap: 1.5rem; }
 .course-groups h3 { font-size: 1.15rem; margin-bottom: .65rem; }
-#conferences { grid-template-columns: minmax(0, 1fr); gap: .7rem; }
+#conferences { grid-template-columns: minmax(0, 1fr); gap: 1rem; }
 .table-heading { display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
-.table-heading button {
+.table-heading button, .expand-button {
   font: inherit;
   font-size: .9rem;
   color: var(--ink);
@@ -50,7 +50,19 @@ footer { border-top: 1px solid var(--rule); }
   padding: .4rem .75rem;
   cursor: pointer;
 }
-.table-heading button:hover { border-color: currentColor; }
+.table-heading button:hover, .expand-button:hover { border-color: currentColor; }
+.table-heading button:focus-visible, .expand-button:focus-visible { outline: 2px solid var(--green); outline-offset: 2px; }
+/* 放大入口贴在表格右上角，与表头同一行 */
+.conference-frame { position: relative; }
+.expand-button {
+  position: absolute;
+  top: .15rem;
+  right: 0;
+  font-size: .8rem;
+  line-height: 1.4;
+  padding: .22rem .6rem;
+  background: var(--paper);
+}
 #conference-dialog {
   width: 96vw;
   max-width: 96vw;
@@ -64,24 +76,93 @@ footer { border-top: 1px solid var(--rule); }
 #conference-dialog[open] { display: grid; grid-template-rows: auto minmax(0, 1fr); gap: .8rem; }
 #conference-dialog::backdrop { background: rgb(0 0 0 / 45%); }
 .expanded-table { overflow: auto; overscroll-behavior: contain; }
-#conference-dialog table { min-width: 48rem; font-size: 1.1rem; }
+#conference-dialog .conference-table { min-width: 48rem; font-size: 1.1rem; }
 body:has(#conference-dialog[open]) { overflow: hidden; }
-#conferences table { width: 100%; border-collapse: collapse; table-layout: fixed; }
-#conferences th, #conferences td {
-  padding: .65rem .7rem .65rem 0;
-  text-align: left;
-  vertical-align: top;
+
+/* 参会经历：日期列按内容定宽，余下宽度给活动名称和主题 */
+.conference-table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+.conference-table .col-date { width: 11em; }
+.conference-table .col-name { width: 47%; }
+.conference-table th, .conference-table td { padding: 0 1.3em 0 0; text-align: left; }
+.conference-table th:last-child, .conference-table td:last-child { padding-right: 0; }
+.conference-table th {
+  padding-block: .35rem .6rem;
+  font-size: .8rem;
+  font-weight: 500;
+  letter-spacing: .08em;
+  color: #666;
+  border-bottom: 1px solid #a3afa5;
+}
+.conference-table td {
+  padding-block: 1.05rem;
+  line-height: 1.6;
+  vertical-align: baseline;
   border-bottom: 1px solid var(--rule);
   overflow-wrap: anywhere;
+  text-wrap: pretty;
 }
-#conferences td { padding-block: 1.1rem; line-height: 1.8; }
-#conferences th:first-child { width: 20%; }
-#conferences th:nth-child(2) { width: 42%; }
-#conferences td:first-child { font-variant-numeric: tabular-nums; }
+.conference-table tbody tr:last-child td { border-bottom: 0; }
+.conference-table td:first-child { white-space: nowrap; font-variant-numeric: tabular-nums; }
+.conference-table td:nth-child(2) { font-weight: 600; }
+.conference-table td:nth-child(3) { color: #555; font-size: .94em; }
+
+/* 中等宽度：日期在左，名称和主题上下排列 */
+@media (max-width: 900px) {
+  .conference-frame > .conference-table,
+  .conference-frame > .conference-table :is(thead, tbody, th, td) { display: block; }
+  .conference-frame > .conference-table colgroup { display: none; }
+  /* 表头变成一行字段提示，右侧留出放大按钮的位置 */
+  .conference-frame > .conference-table thead tr {
+    display: flex;
+    align-items: baseline;
+    padding: .35rem 6.5rem .6rem 0;
+    border-bottom: 1px solid #a3afa5;
+  }
+  .conference-frame > .conference-table th { padding: 0; border: 0; }
+  .conference-frame > .conference-table th:first-child { flex: 0 0 auto; width: 10.25rem; margin-right: 1.4rem; }
+  .conference-frame > .conference-table th:nth-child(3)::before {
+    content: "/";
+    content: "/" / "";
+    margin-inline: .5em;
+    color: #a3afa5;
+  }
+  .conference-frame > .conference-table tbody tr {
+    display: grid;
+    grid-template-columns: 10.25rem minmax(0, 1fr);
+    column-gap: 1.4rem;
+    padding-block: 1.1rem;
+    border-bottom: 1px solid var(--rule);
+  }
+  .conference-frame > .conference-table tbody tr:last-child { border-bottom: 0; padding-bottom: 0; }
+  .conference-frame > .conference-table td { padding: 0; border: 0; }
+  .conference-frame > .conference-table td:first-child { grid-row: span 2; }
+  .conference-frame > .conference-table td:nth-child(3) { margin-top: .3rem; }
+}
+
 @media (max-width: 660px) {
   :root { font-size: 16px; }
   header { flex-wrap: wrap; }
   .profile { grid-template-columns: 1fr; gap: 25px; position: relative; }
   .portrait { grid-row: 1; width: 76px; }
   .row { grid-template-columns: 1fr; gap: 20px; }
+}
+
+/* 手机：每条先日期，再名称，再主题 */
+@media (max-width: 560px) {
+  .conference-frame > .conference-table th:first-child { width: auto; margin-right: 0; }
+  .conference-frame > .conference-table th:nth-child(2)::before {
+    content: "/";
+    content: "/" / "";
+    margin-inline: .5em;
+    color: #a3afa5;
+  }
+  .conference-frame > .conference-table tbody tr { grid-template-columns: minmax(0, 1fr); }
+  .conference-frame > .conference-table td:first-child {
+    grid-row: auto;
+    margin-bottom: .2rem;
+    font-size: .86rem;
+    font-weight: 500;
+    letter-spacing: .02em;
+  }
+  .conference-frame > .conference-table td:nth-child(2) { line-height: 1.55; }
 }

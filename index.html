@@ -34,37 +34,39 @@
       </article>
     </section>
     <section class="row" id="conferences" aria-labelledby="conferences-title">
-      <div class="table-heading">
-        <h2 id="conferences-title">参会经历</h2>
-        <button type="button" id="expand-conferences" aria-haspopup="dialog" aria-controls="conference-dialog" hidden>放大表格 ↗</button>
+      <h2 id="conferences-title">参会经历</h2>
+      <div class="conference-frame">
+        <button type="button" class="expand-button" id="expand-conferences" aria-haspopup="dialog" aria-controls="conference-dialog" hidden>放大表格 ↗</button>
+        <!-- 窄屏下行和单元格改为块/网格排布，显式 role 保证读屏软件仍按表格朗读 -->
+        <table class="conference-table" role="table" aria-labelledby="conferences-title">
+          <colgroup><col class="col-date"><col class="col-name"><col class="col-topic"></colgroup>
+          <thead role="rowgroup">
+            <tr role="row"><th scope="col" role="columnheader">时间</th><th scope="col" role="columnheader">活动全称</th><th scope="col" role="columnheader">内容</th></tr>
+          </thead>
+          <tbody role="rowgroup">
+            <tr role="row">
+              <td role="cell">2026年<wbr>10月21–22日</td>
+              <td role="cell">第一届数学与集成电路科学大会（MathIC）「集成电路多物理场仿真的数学基础与前沿」讲习班</td>
+              <td role="cell">网格生成、偏微分方程离散、代数求解与并行计算</td>
+            </tr>
+            <tr role="row">
+              <td role="cell">2026年<wbr>10月10日</td>
+              <td role="cell">中国工业与应用数学学会（CSIAM）第二十四届年会（兰州）</td>
+              <td role="cell">TM67 专题「电磁散射问题的高效算法及其应用」</td>
+            </tr>
+            <tr role="row">
+              <td role="cell">2026年<wbr>9月28–30日</td>
+              <td role="cell">菲数国际数学研讨会（Feishu Mathematics Symposium）</td>
+              <td role="cell">基础数学研究、数学教育与跨学科应用</td>
+            </tr>
+            <tr role="row">
+              <td role="cell">2026年<wbr>7月13–17日</td>
+              <td role="cell">第二届「鳌山论算」暑期学校</td>
+              <td role="cell">高性能计算，包括偏微分方程预处理、混合精度计算与异构计算</td>
+            </tr>
+          </tbody>
+        </table>
       </div>
-      <table aria-labelledby="conferences-title">
-        <thead>
-          <tr><th scope="col">时间</th><th scope="col">活动全称</th><th scope="col">内容</th></tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>2026年<wbr>10月21–22日</td>
-            <td>第一届数学与集成电路科学大会（MathIC）「集成电路多物理场仿真的数学基础与前沿」讲习班</td>
-            <td>网格生成、偏微分方程离散、代数求解与并行计算</td>
-          </tr>
-          <tr>
-            <td>2026年<wbr>10月10日</td>
-            <td>中国工业与应用数学学会（CSIAM）第二十四届年会（兰州）</td>
-            <td>TM67 专题「电磁散射问题的高效算法及其应用」</td>
-          </tr>
-          <tr>
-            <td>2026年<wbr>9月28–30日</td>
-            <td>菲数国际数学研讨会（Feishu Mathematics Symposium）</td>
-            <td>基础数学研究、数学教育与跨学科应用</td>
-          </tr>
-          <tr>
-            <td>2026年<wbr>7月13–17日</td>
-            <td>第二届「鳌山论算」暑期学校</td>
-            <td>高性能计算，包括偏微分方程预处理、混合精度计算与异构计算</td>
-          </tr>
-        </tbody>
-      </table>
       <dialog id="conference-dialog" aria-labelledby="expanded-title">
         <div class="table-heading">
           <h2 id="expanded-title">参会经历</h2>
@@ -121,7 +123,7 @@
     const expandButton = document.getElementById("expand-conferences");
     const conferenceDialog = document.getElementById("conference-dialog");
     if (typeof conferenceDialog.showModal === "function") {
-      const expandedTable = document.querySelector("#conferences > table").cloneNode(true);
+      const expandedTable = document.querySelector("#conferences .conference-table").cloneNode(true);
       expandedTable.setAttribute("aria-labelledby", "expanded-title");
       conferenceDialog.querySelector(".expanded-table").append(expandedTable);
       expandButton.hidden = false;
