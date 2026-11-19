@@ -34,7 +34,10 @@
       </article>
     </section>
     <section class="row" id="conferences" aria-labelledby="conferences-title">
-      <h2 id="conferences-title">参会经历</h2>
+      <div class="table-heading">
+        <h2 id="conferences-title">参会经历</h2>
+        <button type="button" id="expand-conferences" aria-haspopup="dialog" aria-controls="conference-dialog" hidden>放大表格 ↗</button>
+      </div>
       <table aria-labelledby="conferences-title">
         <thead>
           <tr><th scope="col">时间</th><th scope="col">活动全称</th><th scope="col">内容</th></tr>
@@ -62,6 +65,13 @@
           </tr>
         </tbody>
       </table>
+      <dialog id="conference-dialog" aria-labelledby="expanded-title">
+        <div class="table-heading">
+          <h2 id="expanded-title">参会经历</h2>
+          <form method="dialog"><button autofocus>关闭</button></form>
+        </div>
+        <div class="expanded-table" role="region" aria-label="参会经历表格" tabindex="0"></div>
+      </dialog>
     </section>
     <section class="row" id="notes" aria-labelledby="notes-title">
       <h2 id="notes-title">学习笔记</h2>
@@ -107,5 +117,16 @@
     </section>
   </main>
   <footer><span>赵子潇</span><a href="#page-top">返回顶部 ↑</a></footer>
+  <script>
+    const expandButton = document.getElementById("expand-conferences");
+    const conferenceDialog = document.getElementById("conference-dialog");
+    if (typeof conferenceDialog.showModal === "function") {
+      const expandedTable = document.querySelector("#conferences > table").cloneNode(true);
+      expandedTable.setAttribute("aria-labelledby", "expanded-title");
+      conferenceDialog.querySelector(".expanded-table").append(expandedTable);
+      expandButton.hidden = false;
+      expandButton.addEventListener("click", () => conferenceDialog.showModal());
+    }
+  </script>
 </body>
 </html>

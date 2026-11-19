@@ -38,16 +38,44 @@ small { color: #555; white-space: nowrap; }
 footer { border-top: 1px solid var(--rule); }
 .course-groups { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 210px), 1fr)); gap: 1.5rem; }
 .course-groups h3 { font-size: 1.15rem; margin-bottom: .65rem; }
-#conferences { grid-template-columns: 1fr; gap: 1.25rem; }
+#conferences { grid-template-columns: minmax(0, 1fr); gap: .7rem; }
+.table-heading { display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
+.table-heading button {
+  font: inherit;
+  font-size: .9rem;
+  color: var(--ink);
+  background: transparent;
+  border: 1px solid var(--rule);
+  border-radius: .35rem;
+  padding: .4rem .75rem;
+  cursor: pointer;
+}
+.table-heading button:hover { border-color: currentColor; }
+#conference-dialog {
+  width: 96vw;
+  max-width: 96vw;
+  max-height: 94vh;
+  max-height: 94dvh;
+  padding: clamp(14px, 2.5vw, 40px);
+  border: 1px solid var(--rule);
+  color: var(--ink);
+  background: var(--paper);
+}
+#conference-dialog[open] { display: grid; grid-template-rows: auto minmax(0, 1fr); gap: .8rem; }
+#conference-dialog::backdrop { background: rgb(0 0 0 / 45%); }
+.expanded-table { overflow: auto; overscroll-behavior: contain; }
+#conference-dialog table { min-width: 48rem; font-size: 1.1rem; }
+body:has(#conference-dialog[open]) { overflow: hidden; }
 #conferences table { width: 100%; border-collapse: collapse; table-layout: fixed; }
 #conferences th, #conferences td {
-  padding: .65rem .5rem .65rem 0;
+  padding: .65rem .7rem .65rem 0;
   text-align: left;
   vertical-align: top;
   border-bottom: 1px solid var(--rule);
   overflow-wrap: anywhere;
 }
-#conferences th:first-child { width: 22%; }
+#conferences td { padding-block: 1.1rem; line-height: 1.8; }
+#conferences th:first-child { width: 20%; }
 #conferences th:nth-child(2) { width: 42%; }
 #conferences td:first-child { font-variant-numeric: tabular-nums; }
 @media (max-width: 660px) {
